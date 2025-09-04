@@ -26,6 +26,10 @@ export class AuthenticationGuard implements CanActivate {
     try {
       const payload = this.jwtService.verify(token);
       request.userId = payload.userId;
+      request.user = {
+        id: payload.userId,
+        role: payload.role, // Now available for quick role checks
+      };
       return true;
     } catch (e) {
       Logger.error(e.message);

@@ -43,7 +43,7 @@ export class AuthService {
 
     // Hash password
     // eslint-disable-next-line prettier/prettier
-  const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     // Get the role document by name
     const roleDocument = await this.rolesService.getRoleByName(
@@ -59,6 +59,7 @@ export class AuthService {
       email,
       password: hashedPassword,
       roleId: roleDocument._id,
+      role: role.toLowerCase(), // Store role name for quick access
     });
 
     // Return safe user info (exclude password)
@@ -91,6 +92,7 @@ export class AuthService {
     return {
       ...tokens,
       userId: user._id,
+      role: user.role, // Include role in login response
     };
   }
 
@@ -169,7 +171,13 @@ export class AuthService {
   }
 
   async generateUserTokens(userId) {
-    const accessToken = this.jwtService.sign({ userId }, { expiresIn: '10h' });
+    // Include role in JWT payload for authorization
+    const user = await this.UserModel.findById(userId);
+    const accessToken = this.jwtService.sign({ 
+      userId, 
+      role: user.role 
+    }, { expiresIn: '10h' });
+    
     const refreshToken = uuidv4();
 
     await this.storeRefreshToken(refreshToken, userId);
@@ -208,10 +216,10 @@ export class AuthService {
   }
 
   async getUserProfile(userId: string) {
-  const user = await this.UserModel.findById(userId).select('-password -__v'); // exclude password
-  if (!user) {
-    throw new NotFoundException('User not found');
+    const user = await this.UserModel.findById(userId).select('-password -__v'); // exclude password
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user; // Now includes the role field automatically
   }
-  return user;
-}
 }

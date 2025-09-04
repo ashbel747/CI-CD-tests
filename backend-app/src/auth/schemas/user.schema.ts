@@ -14,7 +14,10 @@ export class User extends Document {
   password: string;
 
   @Prop({ type: Types.ObjectId, ref: Role.name, required: true })
-  roleId: Types.ObjectId; // now references the Role collection
+  roleId: Types.ObjectId; // Keep for permissions lookup
+
+  @Prop({ required: true, enum: ['buyer', 'seller'] })
+  role: string; // Add for quick access
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
