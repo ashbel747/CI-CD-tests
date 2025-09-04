@@ -206,4 +206,12 @@ export class AuthService {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return role.permissions;
   }
+
+  async getUserProfile(userId: string) {
+  const user = await this.UserModel.findById(userId).select('-password -__v'); // exclude password
+  if (!user) {
+    throw new NotFoundException('User not found');
+  }
+  return user;
+}
 }
