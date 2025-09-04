@@ -1,19 +1,40 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RolesModule } from './roles/role.module';
+import { TestController } from '../test/test.controller';
+import config from './config/config';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(
-      'mongodb+srv://ashbel:1238%40ashbel@cluster0.yosfxah.mongodb.net/e-learning?retryWrites=true&w=majority&appName=Cluster0',
-    ), // change to your connection string
+    ConfigModule.forRoot({
+      isGlobal: true,
+      cache: true,
+      load: [config],
+    }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (config) => ({
+        secret: config.get('jwt.secret'),
+      }),
+      global: true,
+      inject: [ConfigService],
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config) => ({
+        uri: config.get('database.connectionString'),
+      }),
+      inject: [ConfigService],
+    }),
     AuthModule,
-    UsersModule,
+    RolesModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, TestController],
   providers: [AppService],
 })
 export class AppModule {}
