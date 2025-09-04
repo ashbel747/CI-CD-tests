@@ -8,7 +8,7 @@ import {
 import { SignupDto } from './dtos/signup.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema';
-import mongoose, { Model } from 'mongoose';
+import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dtos/login.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -32,43 +32,45 @@ export class AuthService {
     private rolesService: RolesService,
   ) {}
 
- async signup(signupData: SignupDto) {
-  const { email, password, name, role } = signupData;
+  async signup(signupData: SignupDto) {
+    const { email, password, name, role } = signupData;
 
-  // Check if email is in use
-  const emailInUse = await this.UserModel.findOne({ email });
-  if (emailInUse) {
-    throw new BadRequestException('Email already in use');
-  }
+    // Check if email is in use
+    const emailInUse = await this.UserModel.findOne({ email });
+    if (emailInUse) {
+      throw new BadRequestException('Email already in use');
+    }
 
-  // Hash password
+    // Hash password
+    // eslint-disable-next-line prettier/prettier
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Get the role document by name
+    // Get the role document by name
     const roleDocument = await this.rolesService.getRoleByName(
       role.toLowerCase(),
     );
-  if (!roleDocument) {
-    throw new BadRequestException('Invalid role specified');
+    if (!roleDocument) {
+      throw new BadRequestException('Invalid role specified');
+    }
+
+    // Create user document and save in MongoDB
+    const createdUser = await this.UserModel.create({
+      name,
+      email,
+      password: hashedPassword,
+      roleId: roleDocument._id,
+    });
+
+    // Return safe user info (exclude password)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, ...userSafe } = createdUser.toObject();
+
+    return {
+      success: true,
+      message: 'User created successfully',
+      user: userSafe,
+    };
   }
-
-  // Create user document and save in MongoDB
-  const createdUser = await this.UserModel.create({
-    name,
-    email,
-    password: hashedPassword,
-    roleId: roleDocument._id,
-  });
-
-  // Return safe user info (exclude password)
-  const { password: _, ...userSafe } = createdUser.toObject();
-
-  return {
-    success: true,
-    message: 'User created successfully',
-    user: userSafe,
-  };
-}
 
   async login(credentials: LoginDto) {
     const { email, password } = credentials;
@@ -200,7 +202,7 @@ export class AuthService {
     console.log('User roleId:', user.roleId);
     const role = await this.rolesService.getRoleById(user.roleId.toString());
     console.log('Found role:', role);
-    
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return role.permissions;
   }
