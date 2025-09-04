@@ -1,4 +1,9 @@
-import { IsEmail, IsString, Matches, MinLength } from 'class-validator';
+import { IsEmail, IsString, Matches, MinLength, IsEnum } from 'class-validator';
+
+export enum UserRole {
+  BUYER = 'buyer',
+  SELLER = 'seller',
+}
 
 export class SignupDto {
   @IsString()
@@ -13,4 +18,7 @@ export class SignupDto {
     message: 'Password must contain at least one number',
   })
   password: string;
+
+  @IsEnum(UserRole)
+  role: UserRole;
 }

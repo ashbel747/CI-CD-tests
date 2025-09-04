@@ -19,5 +19,4 @@ export class Role {
   @Prop({ required: true, type: [Permission] })
   permissions: Permission[];
 }
-
 export const RoleSchema = SchemaFactory.createForClass(Role);

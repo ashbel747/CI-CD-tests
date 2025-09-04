@@ -32,26 +32,43 @@ export class AuthService {
     private rolesService: RolesService,
   ) {}
 
-  async signup(signupData: SignupDto) {
-    const { email, password, name } = signupData;
+ async signup(signupData: SignupDto) {
+  const { email, password, name, role } = signupData;
 
-    //Check if email is in use
-    const emailInUse = await this.UserModel.findOne({
-      email,
-    });
-    if (emailInUse) {
-      throw new BadRequestException('Email already in use');
-    }
-    //Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user document and save in mongodb
-    await this.UserModel.create({
-      name,
-      email,
-      password: hashedPassword,
-    });
+  // Check if email is in use
+  const emailInUse = await this.UserModel.findOne({ email });
+  if (emailInUse) {
+    throw new BadRequestException('Email already in use');
   }
+
+  // Hash password
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // Get the role document by name
+    const roleDocument = await this.rolesService.getRoleByName(
+      role.toLowerCase(),
+    );
+  if (!roleDocument) {
+    throw new BadRequestException('Invalid role specified');
+  }
+
+  // Create user document and save in MongoDB
+  const createdUser = await this.UserModel.create({
+    name,
+    email,
+    password: hashedPassword,
+    roleId: roleDocument._id,
+  });
+
+  // Return safe user info (exclude password)
+  const { password: _, ...userSafe } = createdUser.toObject();
+
+  return {
+    success: true,
+    message: 'User created successfully',
+    user: userSafe,
+  };
+}
 
   async login(credentials: LoginDto) {
     const { email, password } = credentials;
@@ -176,10 +193,15 @@ export class AuthService {
 
   async getUserPermissions(userId: string) {
     const user = await this.UserModel.findById(userId);
+    console.log('Found user:', user);
 
     if (!user) throw new BadRequestException();
 
+    console.log('User roleId:', user.roleId);
     const role = await this.rolesService.getRoleById(user.roleId.toString());
+    console.log('Found role:', role);
+    
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return role.permissions;
   }
 }
