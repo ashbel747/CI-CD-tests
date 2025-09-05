@@ -36,18 +36,25 @@ export const fetchMyProducts = async () => {
   return res.json();
 };
 
-export const createProduct = async (form: any) => {
+export const createProduct = async (formData: FormData) => {
   const token = localStorage.getItem("accessToken");
   const res = await fetch("http://localhost:3000/products", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
+      // Note: DO NOT set Content-Type; the browser will set it automatically with FormData
     },
-    body: JSON.stringify(form),
+    body: formData,
   });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Failed to create product: ${res.status} ${error}`);
+  }
+
   return res.json();
 };
+
 
 export const updateProduct = async (id: string, form: any) => {
   const token = localStorage.getItem("accessToken");

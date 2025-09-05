@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { createProduct } from "../lib/product-api";
 
-const categories = ["Electronics", "Fashion", "Books", "Home"];
-const niches = ["Smartphones", "Laptops", "Clothing", "Shoes", "Furniture", "Novels"];
+const categories = ["Top Picks", "Top Selling"];
+const niches = ["bathroom", "living room", "kitchen", "bed room"];
 
 export default function ProductForm() {
   const [form, setForm] = useState({
@@ -12,7 +12,7 @@ export default function ProductForm() {
     description: "",
     initialPrice: 0,
     discountPercent: 0,
-    image: "",
+    image: null as File | null,
     niche: "",
     category: "",
   });
@@ -20,12 +20,19 @@ export default function ProductForm() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: name === "initialPrice" || name === "discountPercent" ? Number(value) : value,
-    }));
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value, files } = e.target as any;
+    if (name === "image" && files) {
+      setForm(prev => ({ ...prev, image: files[0] }));
+    } else {
+      setForm(prev => ({
+        ...prev,
+        [name]:
+          name === "initialPrice" || name === "discountPercent" ? Number(value) : value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,7 +41,16 @@ export default function ProductForm() {
     setMessage("");
 
     try {
-      const res = await createProduct(form);
+      const formData = new FormData();
+      formData.append("name", form.name);
+      formData.append("description", form.description);
+      formData.append("initialPrice", form.initialPrice.toString());
+      formData.append("discountPercent", form.discountPercent.toString());
+      formData.append("niche", form.niche);
+      formData.append("category", form.category);
+      if (form.image) formData.append("image", form.image); // append file
+
+      const res = await createProduct(formData);
       if (res._id) {
         setMessage("✅ Product created successfully!");
         setForm({
@@ -42,7 +58,7 @@ export default function ProductForm() {
           description: "",
           initialPrice: 0,
           discountPercent: 0,
-          image: "",
+          image: null,
           niche: "",
           category: "",
         });
@@ -57,7 +73,10 @@ export default function ProductForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-xl space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-xl space-y-4"
+    >
       <h2 className="text-2xl font-bold">Create New Product</h2>
 
       <input
@@ -99,11 +118,10 @@ export default function ProductForm() {
       />
 
       <input
-        type="text"
+        type="file"
         name="image"
-        value={form.image}
+        accept="image/*"
         onChange={handleChange}
-        placeholder="Image URL"
         className="w-full p-2 border rounded-lg"
         required
       />
@@ -117,8 +135,11 @@ export default function ProductForm() {
         required
       >
         <option value="">Select Category</option>
-        <option value="Top Picks">Top Picks</option>
-        <option value="Top Selling">Top Selling</option>
+        {categories.map(cat => (
+          <option key={cat} value={cat}>
+            {cat}
+          </option>
+        ))}
       </select>
 
       {/* Niche Dropdown */}
@@ -130,10 +151,11 @@ export default function ProductForm() {
         required
       >
         <option value="">Select Niche</option>
-        <option value="bathroom">Bathroom</option>
-        <option value="living room">Living room</option>
-        <option value="kitchen">Kitchen</option>
-        <option value="bed room">Bed room</option>
+        {niches.map(n => (
+          <option key={n} value={n}>
+            {n}
+          </option>
+        ))}
       </select>
 
       <button

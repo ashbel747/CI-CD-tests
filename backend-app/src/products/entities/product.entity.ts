@@ -43,4 +43,3 @@ ProductSchema.pre<Product>('save', function (next) {
   }
   next();
 });
-

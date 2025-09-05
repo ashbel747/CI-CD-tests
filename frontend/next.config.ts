@@ -6,11 +6,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "example.com", // replace with your actual domain
+        hostname: "res.cloudinary.com", // allow Cloudinary images
       },
       {
         protocol: "https",
-        hostname: "picsum.photos", // if you want placeholder images
+        hostname: "picsum.photos", // optional placeholder images
       },
     ],
     domains: ["res.cloudinary.com"],
