@@ -28,6 +28,9 @@ export class Product {
 
   @Prop({ required: true })
   category: string; // e.g. "top-picks", "top-selling"
+
+  @Prop({ required: true })
+  createdBy: string; // store seller userId
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
