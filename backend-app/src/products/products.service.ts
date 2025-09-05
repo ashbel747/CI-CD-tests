@@ -19,8 +19,26 @@ export class ProductsService {
     return created.save();
   }
 
-  async findAll(): Promise<Product[]> {
-    return this.productModel.find().exec();
+  async findAll(filters: { search?: string; category?: string; niche?: string }) {
+    const query: any = {};
+
+    if (filters.search) {
+      // Match on name OR description (case-insensitive)
+      query.$or = [
+        { name: { $regex: filters.search, $options: 'i' } },
+        { description: { $regex: filters.search, $options: 'i' } },
+      ];
+    }
+
+    if (filters.category) {
+      query.category = { $regex: `^${filters.category}$`, $options: 'i' };
+    }
+
+    if (filters.niche) {
+      query.niche = { $regex: `^${filters.niche}$`, $options: 'i' };
+    }
+
+    return this.productModel.find(query).exec();
   }
 
   async findOne(id: string): Promise<Product> {
