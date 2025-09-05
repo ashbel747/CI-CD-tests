@@ -10,6 +10,12 @@ export type Product = {
   category: string;
 };
 
+export const searchProducts = async (params: { search?: string; category?: string; niche?: string }) => {
+  const query = new URLSearchParams(params as any).toString();
+  const res = await fetch(`http://localhost:3000/products?${query}`);
+  return res.json();
+};
+
 export async function fetchProducts(): Promise<Product[]> {
   const res = await fetch("http://localhost:3000/products", {
     cache: "no-store", // ensures fresh data every fetch

@@ -8,6 +8,7 @@ import {
   Req,
   UseGuards,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -26,8 +27,12 @@ export class ProductsController {
   }
 
   @Get()
-  findAll() {
-    return this.productsService.findAll();
+  async findAll(
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+    @Query('niche') niche?: string,
+  ) {
+    return this.productsService.findAll({ search, category, niche });
   }
 
   @Get('me')

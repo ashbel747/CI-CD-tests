@@ -1,11 +1,36 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { fetchProducts, Product } from "../lib/product-api";
 import Image from "next/image";
-import Link from 'next/link'
+import Link from "next/link";
 
-export default async function ProductsPage() {
-  const products: Product[] = await fetchProducts();
+export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [search, setSearch] = useState("");
 
-  // Normalize values (lowercase + trim)
+  useEffect(() => {
+    const loadProducts = async () => {
+      const allProducts = await fetchProducts();
+
+      // Apply client-side search filtering
+      const filtered = allProducts.filter((p: Product) => {
+        const query = search.toLowerCase();
+        return (
+          p.name.toLowerCase().includes(query) ||
+          p.description.toLowerCase().includes(query) ||
+          p.category.toLowerCase().includes(query) ||
+          p.niche.toLowerCase().includes(query)
+        );
+      });
+
+      setProducts(filtered);
+    };
+
+    loadProducts();
+  }, [search]);
+
+  // Normalize values for grouping
   const categories = Array.from(
     new Set(products.map((p) => p.category.trim().toLowerCase()))
   );
@@ -15,9 +40,20 @@ export default async function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-12 text-center">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
         Our Products
       </h1>
+
+      {/* 🔍 Search Input */}
+      <div className="flex justify-center mb-12">
+        <input
+          type="text"
+          placeholder="Search products by name, category, or niche..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full max-w-lg p-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
 
       {/* Loop through categories */}
       {categories.map((category) => {
@@ -64,8 +100,7 @@ export default async function ProductsPage() {
   );
 }
 
-// ✅ Extracted card component (with discount badge inside image)
-// ✅ Updated ProductCard component (replace the existing one in /products/page.tsx)
+// ✅ Product Card
 function ProductCard({ product }: { product: Product }) {
   return (
     <div className="bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition cursor-pointer">
@@ -81,7 +116,6 @@ function ProductCard({ product }: { product: Product }) {
             />
           )}
 
-          {/* Floating discount badge */}
           {product.discountPercent && (
             <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
               -{product.discountPercent}%
@@ -101,7 +135,11 @@ function ProductCard({ product }: { product: Product }) {
                   Ksh {product.initialPrice}
                 </span>
                 <span className="text-green-600 font-bold">
-                  Ksh {(product.initialPrice * (1 - product.discountPercent / 100)).toFixed(0)}
+                  Ksh{" "}
+                  {(
+                    product.initialPrice *
+                    (1 - product.discountPercent / 100)
+                  ).toFixed(0)}
                 </span>
               </>
             ) : (
