@@ -1,5 +1,9 @@
 import { Reflector } from '@nestjs/core';
-import { ExecutionContext, ForbiddenException, UnauthorizedException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  ForbiddenException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '../auth/auth.service';
 import { AuthorizationGuard } from './authorization.guard';
@@ -53,11 +57,13 @@ describe('AuthorizationGuard', () => {
       // Mock the reflector to return null, simulating no permissions required
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(null);
 
+      // eslint-disable-next-line prettier/prettier
       const result = await guard.canActivate(mockExecutionContext as unknown as ExecutionContext);
-      
+
       expect(reflector.getAllAndOverride).toHaveBeenCalledWith(PERMISSIONS_KEY, [
+        // eslint-disable-next-line prettier/prettier
         mockExecutionContext.getHandler(),
-        mockExecutionContext.getClass(),
+       mockExecutionContext.getClass(),
       ]);
       expect(result).toBe(true);
     });
@@ -70,12 +76,15 @@ describe('AuthorizationGuard', () => {
         { resource: 'users', actions: ['read', 'write', 'delete'] },
       ];
 
+      // eslint-disable-next-line prettier/prettier
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(requiredPermissions);
       mockAuthService.getUserPermissions.mockResolvedValue(userPermissions);
 
+      // eslint-disable-next-line prettier/prettier
       const result = await guard.canActivate(mockExecutionContext as unknown as ExecutionContext);
 
       expect(reflector.getAllAndOverride).toHaveBeenCalledWith(PERMISSIONS_KEY, [
+        // eslint-disable-next-line prettier/prettier
         mockExecutionContext.getHandler(),
         mockExecutionContext.getClass(),
       ]);
@@ -90,10 +99,12 @@ describe('AuthorizationGuard', () => {
           getRequest: () => ({}),
         }),
       };
+      // eslint-disable-next-line prettier/prettier
       await expect(guard.canActivate(mockRequest as unknown as ExecutionContext)).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw ForbiddenException if the user is missing a required resource', async () => {
+      // eslint-disable-next-line prettier/prettier
       const requiredPermissions: Permission[] = [{ resource: 'users', actions: ['read'] }];
       const userPermissions: Permission[] = [{ resource: 'products', actions: ['read'] }];
 
@@ -105,20 +116,26 @@ describe('AuthorizationGuard', () => {
 
     it('should throw ForbiddenException if the user is missing a required action', async () => {
       const requiredPermissions: Permission[] = [{ resource: 'users', actions: ['read', 'write'] }];
+      // eslint-disable-next-line prettier/prettier
       const userPermissions: Permission[] = [{ resource: 'users', actions: ['read'] }];
 
+      // eslint-disable-next-line prettier/prettier
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(requiredPermissions);
       mockAuthService.getUserPermissions.mockResolvedValue(userPermissions);
 
+      // eslint-disable-next-line prettier/prettier
       await expect(guard.canActivate(mockExecutionContext as unknown as ExecutionContext)).rejects.toThrow(ForbiddenException);
     });
 
     it('should throw ForbiddenException if the authService.getUserPermissions call fails', async () => {
+      // eslint-disable-next-line prettier/prettier
       const requiredPermissions: Permission[] = [{ resource: 'users', actions: ['read'] }];
       
+      // eslint-disable-next-line prettier/prettier
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(requiredPermissions);
       mockAuthService.getUserPermissions.mockRejectedValue(new Error('DB error'));
 
+      // eslint-disable-next-line prettier/prettier
       await expect(guard.canActivate(mockExecutionContext as unknown as ExecutionContext)).rejects.toThrow(ForbiddenException);
     });
   });
