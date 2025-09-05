@@ -38,13 +38,13 @@ export default function ProfilePage() {
         <p><strong>Name:</strong> {user.name}</p>
         <p><strong>Email:</strong> {user.email}</p>
         <p><strong>Role:</strong> 
-          <span className={`ml-2 px-2 py-1 rounded text-sm font-medium ${
-  user.role === 'seller' 
-    ? 'bg-blue-100 text-blue-800' 
-    : 'bg-green-100 text-green-800'
-}`}>
-  {user.role ? String(user.role).charAt(0).toUpperCase() + String(user.role).slice(1) : 'N/A'}
-</span>
+        <span className={`ml-2 px-2 py-1 rounded text-sm font-medium ${
+          user.role === 'seller' 
+            ? 'bg-blue-100 text-blue-800' 
+            : 'bg-green-100 text-green-800'
+        }`}>
+          {user.role}
+        </span>
 
         </p>
       </div>
