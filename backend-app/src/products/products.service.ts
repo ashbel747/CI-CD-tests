@@ -18,32 +18,32 @@ export class ProductsService {
   ) {}
 
   async create(
-  createProductDto: CreateProductDto,
-  userId: string,
-  file: Express.Multer.File,
-): Promise<Product> {
-  const cloudinaryClient = this.cloudinaryService.getClient();
+    createProductDto: CreateProductDto,
+    userId: string,
+    file: Express.Multer.File,
+  ): Promise<Product> {
+    const cloudinaryClient = this.cloudinaryService.getClient();
 
-  // Wrap Cloudinary's upload_stream in a Promise
-  const uploadResult: any = await new Promise((resolve, reject) => {
-    const stream = cloudinaryClient.uploader.upload_stream(
-      { folder: 'products', resource_type: 'image' },
-      (error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      },
-    );
-    stream.end(file.buffer); // send buffer directly
-  });
+    // Wrap Cloudinary's upload_stream in a Promise
+    const uploadResult: any = await new Promise((resolve, reject) => {
+      const stream = cloudinaryClient.uploader.upload_stream(
+        { folder: 'products', resource_type: 'image' },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        },
+      );
+      stream.end(file.buffer); // send buffer directly
+    });
 
-  const created = new this.productModel({
-    ...createProductDto,
-    image: uploadResult.secure_url, // store Cloudinary URL
-    createdBy: userId,
-  });
+    const created = new this.productModel({
+      ...createProductDto,
+      image: uploadResult.secure_url, // store Cloudinary URL
+      createdBy: userId,
+    });
 
-  return created.save();
-}
+    return created.save();
+  }
 
 
   // Existing methods remain unchanged
@@ -66,36 +66,36 @@ export class ProductsService {
     return product;
   }
 
- async update(
-  id: string,
-  updateProductDto: UpdateProductDto,
-  userId: string,
-  file?: Express.Multer.File,
-): Promise<Product> {
-  const product = await this.productModel.findById(id).exec();
-  if (!product) throw new NotFoundException('Product not found');
-  if (product.createdBy !== userId) throw new ForbiddenException('You can only update your own products');
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+    userId: string,
+    file?: Express.Multer.File,
+  ): Promise<Product> {
+    const product = await this.productModel.findById(id).exec();
+    if (!product) throw new NotFoundException('Product not found');
+    if (product.createdBy !== userId) throw new ForbiddenException('You can only update your own products');
 
-  // If a new image is uploaded, send it to Cloudinary
-  if (file) {
-    const cloudinaryClient = this.cloudinaryService.getClient();
-    const uploadResult: any = await new Promise((resolve, reject) => {
-      const stream = cloudinaryClient.uploader.upload_stream(
-        { folder: 'products', resource_type: 'image' },
-        (error, result) => {
-          if (error) return reject(error);
-          resolve(result);
-        },
-      );
-      stream.end(file.buffer);
-    });
+    // If a new image is uploaded, send it to Cloudinary
+    if (file) {
+      const cloudinaryClient = this.cloudinaryService.getClient();
+      const uploadResult: any = await new Promise((resolve, reject) => {
+        const stream = cloudinaryClient.uploader.upload_stream(
+          { folder: 'products', resource_type: 'image' },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          },
+        );
+        stream.end(file.buffer);
+      });
 
-    product.image = uploadResult.secure_url; // update image URL
+      product.image = uploadResult.secure_url; // update image URL
+    }
+
+    Object.assign(product, updateProductDto); // update other fields
+    return product.save();
   }
-
-  Object.assign(product, updateProductDto); // update other fields
-  return product.save();
-}
 
 
   async remove(id: string, userId: string): Promise<DeleteResult> {

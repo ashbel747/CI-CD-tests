@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { fetchProductById, Product } from "../../lib/product-api";
+import {updateProduct, fetchProductById, Product } from "../../lib/product-api";
+import axios from "axios";
 
 export default function EditProductPage() {
   const { id } = useParams();
@@ -51,25 +52,13 @@ export default function EditProductPage() {
     if (imageFile) form.append("image", imageFile);
 
     try {
-      const token = localStorage.getItem("accessToken");
-      const res = await fetch(`http://localhost:3000/products/${id}`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-        body: form,
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || "Update failed");
-      }
-
-      const updatedProduct: Product = await res.json();
-      setProduct(updatedProduct); // update UI immediately
-      setImageFile(null); // reset selected file
+      const updated = await updateProduct(id as string, form);
+      setProduct(updated);
+      setImageFile(null);
       setMessage({ type: "success", text: "Product updated successfully!" });
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setMessage({ type: "error", text: (err as Error).message || "Update failed" });
+      setMessage({ type: "error", text: err.message || "Update failed" });
     } finally {
       setSubmitting(false);
     }
@@ -95,8 +84,19 @@ export default function EditProductPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <input name="name" defaultValue={product.name} className="w-full border p-2 rounded" required />
         <textarea name="description" defaultValue={product.description} className="w-full border p-2 rounded" required />
-        <input name="initialPrice" defaultValue={product.initialPrice} type="number" className="w-full border p-2 rounded" required />
-        <input name="discountPercent" defaultValue={product.discountPercent} type="number" className="w-full border p-2 rounded" />
+        <input
+          name="initialPrice"
+          defaultValue={product.initialPrice}
+          type="number"
+          className="w-full border p-2 rounded"
+          required
+        />
+        <input
+          name="discountPercent"
+          defaultValue={product.discountPercent}
+          type="number"
+          className="w-full border p-2 rounded"
+        />
         <input name="category" defaultValue={product.category} className="w-full border p-2 rounded" required />
         <input name="niche" defaultValue={product.niche} className="w-full border p-2 rounded" required />
 

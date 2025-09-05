@@ -25,24 +25,24 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-@UseGuards(AuthenticationGuard, new RolesGuard('seller'))
-@UseInterceptors(FileInterceptor('image'))
-async create(
-  @Body() dto: CreateProductDto,
-  @Req() req,
-  @UploadedFile() file: Express.Multer.File,
-) {
-  // Debug logs
-    console.log('Received body:', dto); // check all text fields
-  console.log('Received file:', file);   // check if Multer captured the file
-  console.log('User ID:', req.user.id);  // confirm authenticated user
+  @UseGuards(AuthenticationGuard, new RolesGuard('seller'))
+  @UseInterceptors(FileInterceptor('image'))
+  async create(
+    @Body() dto: CreateProductDto,
+    @Req() req,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    // Debug logs
+      console.log('Received body:', dto); // check all text fields
+    console.log('Received file:', file);   // check if Multer captured the file
+    console.log('User ID:', req.user.id);  // confirm authenticated user
 
-  if (!file) {
-    throw new BadRequestException('Product image is required');
+    if (!file) {
+      throw new BadRequestException('Product image is required');
+    }
+
+    return this.productsService.create(dto, req.user.id, file);
   }
-
-  return this.productsService.create(dto, req.user.id, file);
-}
 
 
   @Get()
@@ -65,17 +65,17 @@ async create(
     return this.productsService.findOne(id);
   }
 
- @Put(':id')
-@UseGuards(AuthenticationGuard, new RolesGuard('seller'))
-@UseInterceptors(FileInterceptor('image'))
-async update(
-  @Param('id') id: string,
-  @Body() dto: UpdateProductDto,
-  @Req() req,
-  @UploadedFile() file?: Express.Multer.File,
-) {
-  return this.productsService.update(id, dto, req.user.id, file);
-}
+  @Put(':id')
+  @UseGuards(AuthenticationGuard, new RolesGuard('seller'))
+  @UseInterceptors(FileInterceptor('image'))
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateProductDto,
+    @Req() req,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.productsService.update(id, dto, req.user.id, file);
+  }
 
 
   @Delete(':id')
