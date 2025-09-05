@@ -173,11 +173,13 @@ export class AuthService {
   async generateUserTokens(userId) {
     // Include role in JWT payload for authorization
     const user = await this.UserModel.findById(userId);
-    const accessToken = this.jwtService.sign({ 
-      userId, 
-      role: user.role 
-    }, { expiresIn: '10h' });
-    
+    const accessToken = this.jwtService.sign(
+      {
+        userId,
+        role: user.role,
+      },
+      { expiresIn: '10h' },
+    )
     const refreshToken = uuidv4();
 
     await this.storeRefreshToken(refreshToken, userId);

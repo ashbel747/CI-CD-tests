@@ -4,7 +4,7 @@ import { Resource } from '../enums/resource.enum';
 
 @Schema()
 class Permission {
-  @Prop({ required: true, enum: Resource })
+  @Prop({ required: true, enum: Resource, type: String })
   resource: Resource;
 
   @Prop({ type: [{ type: String, enum: Action }] })
