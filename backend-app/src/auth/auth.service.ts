@@ -113,6 +113,8 @@ export class AuthService {
     const newHashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = newHashedPassword;
     await user.save();
+
+    return { message: 'Password changed successfully' };
   }
 
   async forgotPassword(email: string) {
