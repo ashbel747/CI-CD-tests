@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
         hostname: "picsum.photos", // if you want placeholder images
       },
     ],
+    domains: ["res.cloudinary.com"],
   },
 };
 
