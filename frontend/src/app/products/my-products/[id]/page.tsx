@@ -29,7 +29,7 @@ export default function EditProductPage() {
       niche: form.get("niche"),
     };
     await updateProduct(id as string, updated);
-    router.push("/my-products");
+    router.push("/products/my-products");
   }
 
   if (!product) return <p className="p-6">Loading...</p>;

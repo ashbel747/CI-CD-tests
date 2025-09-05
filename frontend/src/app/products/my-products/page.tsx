@@ -43,6 +43,15 @@ export default function MyProductsPage() {
         My Products
       </h1>
 
+      <div className="m-3 ">
+        <Link
+          href={`/products/create`}
+          className="bg-red-500 text-white text-xs font-bold p-5 rounded-full shadow-md"
+        >
+          Create new product
+        </Link>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
           <ProductCard
