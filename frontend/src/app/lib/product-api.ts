@@ -53,6 +53,11 @@ export const updateProduct = async (id: string, form: any) => {
     },
     body: JSON.stringify(form),
   });
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Update failed: ${res.status} ${error}`);
+  }
+
   return res.json();
 };
 
