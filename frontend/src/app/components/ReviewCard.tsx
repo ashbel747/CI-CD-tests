@@ -8,20 +8,40 @@ type ReviewCardProps = {
 
 export default function ReviewCard({ review }: ReviewCardProps) {
   return (
-    <div className="border rounded-lg p-4 bg-white shadow-sm mb-4">
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="font-semibold">{review.name || "Anonymous"}</h3>
-        <span className="text-yellow-500">
-          {"★".repeat(review.rating)}{" "}
-          <span className="text-gray-400">
-            {"★".repeat(5 - review.rating)}
-          </span>
-        </span>
+    <div className="card-bg rounded-xl p-6 shadow-lg border border-gray-700 mb-4 transition-all duration-200 hover:shadow-xl">
+      <div className="flex justify-between items-start mb-4">
+        <h3 className="header-text font-semibold text-lg">
+          {review.name || "Anonymous"}
+        </h3>
+        <div className="flex items-center gap-1">
+          {[...Array(5)].map((_, index) => (
+            <span
+              key={index}
+              className={`text-lg ${
+                index < review.rating 
+                  ? "text-orange-400" 
+                  : "text-gray-600"
+              }`}
+            >
+              ★
+            </span>
+          ))}
+        </div>
       </div>
-      <p className="text-gray-700 mb-2">{review.comment}</p>
-      <small className="text-gray-400">
-        {new Date(review.createdAt).toLocaleDateString()}
-      </small>
+      
+      <p className="text-foreground leading-relaxed mb-4 text-base">
+        {review.comment}
+      </p>
+      
+      <div className="flex justify-end">
+        <small className="text-gray-400 text-sm">
+          {new Date(review.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          })}
+        </small>
+      </div>
     </div>
   );
 }
