@@ -15,6 +15,7 @@ import { ChangePasswordDto } from './dtos/change-password.dto';
 import { AuthenticationGuard } from 'src/guards/authentication.guard';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
 import { ResetPasswordDto } from './dtos/reset-password.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -65,5 +66,11 @@ export class AuthController {
   @Get('me')
   async getMe(@Req() req) {
     return this.authService.getUserProfile(req.userId);
+  }
+
+  @UseGuards(AuthenticationGuard)
+  @Put('me')
+  async updateProfile(@Req() req, @Body() updateData: UpdateUserDto) {
+    return this.authService.updateUserProfile(req.userId, updateData);
   }
 }

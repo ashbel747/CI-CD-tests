@@ -18,6 +18,7 @@ import { nanoid } from 'nanoid';
 import { ResetToken } from './schemas/reset-token.schema';
 import { MailService } from 'src/services/mail.service';
 import { RolesService } from 'src/roles/roles.service';
+import { UpdateUserDto } from './dtos/update-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -226,4 +227,38 @@ export class AuthService {
     }
     return user; // Now includes the role field automatically
   }
+
+  async updateUserProfile(userId: string, updateData: UpdateUserDto) {
+  const user = await this.UserModel.findById(userId);
+  if (!user) {
+    throw new NotFoundException('User not found');
+  }
+
+  if (updateData.name) {
+    user.name = updateData.name;
+  }
+
+  if (updateData.email) {
+    // Check if email is already taken by another user
+    const emailInUse = await this.UserModel.findOne({ email: updateData.email, _id: { $ne: userId } });
+    if (emailInUse) {
+      throw new BadRequestException('Email already in use');
+    }
+    user.email = updateData.email;
+  }
+
+  if (updateData.role) {
+    user.role = updateData.role;
+  }
+
+  await user.save();
+
+  // Exclude sensitive fields before returning
+  const { password, __v, ...safeUser } = user.toObject();
+  return {
+    success: true,
+    message: 'Profile updated successfully',
+    user: safeUser,
+  };
+}
 }
