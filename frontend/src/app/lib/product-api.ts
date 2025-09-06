@@ -1,3 +1,13 @@
+// lib/product-api.ts
+export type Review = {
+  _id: string;
+  userId: string;
+  name?: string; // reviewer’s name (optional if returned from backend)
+  comment: string;
+  rating: number;
+  createdAt: string;
+};
+
 export type Product = {
   _id: string;
   name: string;
@@ -8,7 +18,10 @@ export type Product = {
   image?: string;
   niche: string;
   category: string;
+  reviews?: Review[]; // 👈 added reviews
 };
+
+// ---------- Product APIs ----------
 
 export const searchProducts = async (params: { search?: string; category?: string; niche?: string }) => {
   const query = new URLSearchParams(params as any).toString();
@@ -97,3 +110,24 @@ export async function fetchProductById(id: string): Promise<Product> {
 
   return res.json();
 }
+
+// ---------- Review APIs ----------
+
+export const addReview = async (productId: string, review: { comment: string; rating: number }) => {
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`http://localhost:3000/products/${productId}/reviews`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(review),
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Failed to add review: ${res.status} ${error}`);
+  }
+
+  return res.json();
+};
