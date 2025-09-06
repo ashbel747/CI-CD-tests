@@ -67,9 +67,11 @@ export default function ProductsPage() {
               {category.replace("-", " ")}
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex gap-6 overflow-x-auto scrollbar-hide px-2">
               {categoryProducts.map((product) => (
-                <ProductCard key={product._id} product={product} />
+                <div key={product._id} className="flex-none w-80">
+                  <ProductCard product={product} />
+                </div>
               ))}
             </div>
           </div>
@@ -88,9 +90,11 @@ export default function ProductsPage() {
               {niche.replace("-", " ")}
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex gap-6 overflow-x-auto scrollbar-hide px-2">
               {nicheProducts.map((product) => (
-                <ProductCard key={product._id} product={product} />
+                <div key={product._id} className="flex-none w-80">
+                  <ProductCard product={product} />
+                </div>
               ))}
             </div>
           </div>
