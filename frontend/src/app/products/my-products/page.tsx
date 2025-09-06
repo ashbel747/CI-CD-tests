@@ -5,17 +5,32 @@ import Image from "next/image";
 import Link from "next/link";
 import { fetchMyProducts, deleteProduct, Product } from "../../lib/product-api";
 
+type ErrorState = {
+  message: string;
+  status?: number;
+};
+
 export default function MyProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<ErrorState | null>(null);
 
   useEffect(() => {
     async function loadProducts() {
       try {
         const data = await fetchMyProducts();
+
+        if (!Array.isArray(data)) {
+          throw { message: "Unauthorized to access products", status: 403 };
+        }
+
         setProducts(data);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to fetch my products", err);
+        setError({
+          message: err?.message || "Something went wrong",
+          status: err?.status,
+        });
       } finally {
         setLoading(false);
       }
@@ -27,15 +42,24 @@ export default function MyProductsPage() {
     if (!confirm("Are you sure you want to delete this product?")) return;
     try {
       await deleteProduct(id);
-      setProducts((prev) => prev.filter((p) => p._id !== id)); // remove from UI
+      setProducts((prev) => prev.filter((p) => p._id !== id));
     } catch (err) {
       console.error("Delete failed", err);
       alert("Failed to delete product");
     }
   }
 
+  // ---- UI states ----
   if (loading) return <p className="p-6">Loading...</p>;
-  if (products.length === 0) return <p className="p-6">No products created yet.</p>;
+  if (error)
+    return (
+      <div className="p-6 text-center text-red-600">
+        <h2 className="text-2xl font-semibold mb-2">You should have a correct user role to access this page!!</h2>
+        <p>{error.message}</p>
+      </div>
+    );
+  if (products.length === 0)
+    return <p className="p-6">No products created yet.</p>;
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -43,7 +67,7 @@ export default function MyProductsPage() {
         My Products
       </h1>
 
-      <div className="m-3 ">
+      <div className="m-3">
         <Link
           href={`/products/create`}
           className="bg-red-500 text-white text-xs font-bold p-5 rounded-full shadow-md"
@@ -93,9 +117,7 @@ function ProductCard({
       </div>
 
       <div className="p-4">
-        <h2 className="text-lg font-semibold text-gray-800">
-          {product.name}
-        </h2>
+        <h2 className="text-lg font-semibold text-gray-800">{product.name}</h2>
 
         <div className="flex items-center gap-2 mb-3">
           {product.discountedPrice ? (
@@ -115,8 +137,12 @@ function ProductCard({
         </div>
 
         <div className="flex justify-between text-sm text-gray-500 mb-4">
-          <span className="px-2 py-1 bg-gray-100 rounded-lg">{product.niche}</span>
-          <span className="px-2 py-1 bg-gray-100 rounded-lg">{product.category}</span>
+          <span className="px-2 py-1 bg-gray-100 rounded-lg">
+            {product.niche}
+          </span>
+          <span className="px-2 py-1 bg-gray-100 rounded-lg">
+            {product.category}
+          </span>
         </div>
 
         {/* Actions */}
