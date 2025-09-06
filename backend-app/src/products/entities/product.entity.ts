@@ -9,6 +9,9 @@ export class Review {
   userId: string;
 
   @Prop({ required: true })
+  name: string; // ✅ added reviewer’s name
+
+  @Prop({ required: true })
   comment: string;
 
   @Prop({ required: true, min: 1, max: 5 })
@@ -47,7 +50,19 @@ export class Product {
   @Prop({ required: true })
   createdBy: string; // store seller userId
 
-  @Prop({ type: [{ userId: String, comment: String, rating: Number, createdAt: Date }], default: [] })
+  // ✅ reviews now include `name`
+  @Prop({
+    type: [
+      {
+        userId: String,
+        name: String,
+        comment: String,
+        rating: Number,
+        createdAt: Date,
+      },
+    ],
+    default: [],
+  })
   reviews: Review[];
 }
 
