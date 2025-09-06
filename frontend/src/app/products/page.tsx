@@ -51,7 +51,7 @@ export default function ProductsPage() {
           placeholder="Search products by name, category, or niche..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full max-w-lg p-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full max-w-lg p-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-pink-300 dark:bg-white text-black"
         />
       </div>
 

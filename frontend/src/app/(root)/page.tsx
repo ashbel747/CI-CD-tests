@@ -1,9 +1,12 @@
+import HeroCarousel from "../components/HeroCarousel";
+import ProductsPage from "../products/page";
 
 export default function HomePage() {
 
   return (
-    <div>
-      HomePage
+    <div className="min-h-screen">
+      <HeroCarousel />
+      <ProductsPage />
     </div>
   );
 }
