@@ -49,7 +49,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-800 text-black dark:text-white min-h-screen">
+    <div className="bg-white dark:bg-gray-800 text-black dark:text-white min-h-screen mt-11">
       <div className="flex justify-between items-center p-4">
         <ChevronLeft size={24} className="text-black dark:text-white" />
         <h1 className="text-xl font-bold text-pink-600">My Profile</h1>
