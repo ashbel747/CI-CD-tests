@@ -9,6 +9,7 @@ import { Product, ProductDocument } from './entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { CloudinaryService } from '../config/cloudinary';
+import { CreateReviewDto } from './dto/create-review.dto';
 
 @Injectable()
 export class ProductsService {
@@ -107,5 +108,20 @@ export class ProductsService {
 
   async findMyProducts(userId: string): Promise<Product[]> {
     return this.productModel.find({ createdBy: userId }).exec();
+  }
+
+  async addReview(productId: string, userId: string, reviewDto: CreateReviewDto) {
+    const product = await this.productModel.findById(productId).exec();
+    if (!product) throw new NotFoundException('Product not found');
+
+    const review = {
+      userId,
+      comment: reviewDto.comment,
+      rating: reviewDto.rating,
+      createdAt: new Date(),
+    };
+
+    product.reviews.push(review);
+    return product.save();
   }
 }

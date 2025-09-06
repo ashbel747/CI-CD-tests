@@ -4,6 +4,21 @@ import { Document } from 'mongoose';
 export type ProductDocument = Product & Document;
 
 @Schema({ timestamps: true })
+export class Review {
+  @Prop({ required: true })
+  userId: string;
+
+  @Prop({ required: true })
+  comment: string;
+
+  @Prop({ required: true, min: 1, max: 5 })
+  rating: number;
+
+  @Prop({ default: Date.now })
+  createdAt: Date;
+}
+
+@Schema({ timestamps: true })
 export class Product {
   @Prop({ required: true })
   name: string;
@@ -31,6 +46,9 @@ export class Product {
 
   @Prop({ required: true })
   createdBy: string; // store seller userId
+
+  @Prop({ type: [{ userId: String, comment: String, rating: Number, createdAt: Date }], default: [] })
+  reviews: Review[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

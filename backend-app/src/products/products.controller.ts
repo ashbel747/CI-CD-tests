@@ -17,6 +17,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { CreateReviewDto } from './dto/create-review.dto';
 import { AuthenticationGuard } from 'src/guards/authentication.guard';
 import { RolesGuard } from 'src/guards/role.guard';
 
@@ -82,5 +83,15 @@ export class ProductsController {
   @UseGuards(AuthenticationGuard, new RolesGuard('seller'))
   async remove(@Param('id') id: string, @Req() req) {
     return this.productsService.remove(id, req.user.id);
+  }
+
+  @Post(':id/reviews')
+  @UseGuards(AuthenticationGuard) // any logged-in user can review
+  async addReview(
+    @Param('id') productId: string,
+    @Req() req,
+    @Body() dto: CreateReviewDto,
+  ) {
+    return this.productsService.addReview(productId, req.user.id, dto);
   }
 }
