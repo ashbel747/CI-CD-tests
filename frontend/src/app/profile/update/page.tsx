@@ -133,7 +133,7 @@ export default function UpdateProfileForm() {
                   />
                   <label
                     htmlFor="buyer"
-                    className="block text-center py-3 rounded-lg border border-gray-600 bg-[#3e3538] cursor-pointer peer-checked:bg-pink-500 transition-colors"
+                    className="block text-center py-3 rounded-lg border border-gray-600 bg-[#3e3538] cursor-pointer peer-checked:bg-[#3F2E31] transition-colors"
                   >
                     Buyer
                   </label>
@@ -152,7 +152,7 @@ export default function UpdateProfileForm() {
                   />
                   <label
                     htmlFor="seller"
-                    className="block text-center py-3 rounded-lg border border-gray-600 bg-[#3e3538] cursor-pointer peer-checked:bg-pink-500 transition-colors"
+                    className="block text-center py-3 rounded-lg border border-gray-600 bg-[#3e3538] cursor-pointer peer-checked:bg-[#3F2E31] transition-colors"
                   >
                     Seller
                   </label>
@@ -163,7 +163,7 @@ export default function UpdateProfileForm() {
           <button
             type="submit"
             disabled={updating}
-            className="w-full bg-pink-500 text-white py-4 rounded-xl mt-6 font-semibold disabled:opacity-50 hover:bg-pink-600 transition-colors"
+            className="w-full bg-[#3F2E31] text-white py-4 rounded-xl mt-6 font-semibold disabled:opacity-50 hover:bg-pink-600 transition-colors"
           >
             {updating ? "Updating..." : "Update Profile"}
           </button>
