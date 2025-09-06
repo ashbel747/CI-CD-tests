@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createProduct } from "../lib/product-api";
 
-const categories = ["Top Picks", "Top Selling"];
+const categories = ["Top Picks", "Top Selling", "Discounted"];
 const niches = ["bathroom", "living room", "kitchen", "bed room"];
 
 export default function ProductForm() {
