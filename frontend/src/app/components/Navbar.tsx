@@ -9,7 +9,7 @@ import { Home, LogOut, Scroll, User, Moon, Sun } from 'lucide-react';
 type UserProfile = {
   name: string;
   email: string;
-  roleId?: string;
+  role: string;
 };
 
 export default function Navbar() {
@@ -84,6 +84,16 @@ export default function Navbar() {
             !loading &&
             user && (
               <div className="flex items-center space-x-4">
+                {user.role === "seller" && (
+                  <>
+                    <Link
+                      href="/products/my-products"
+                      className="text-gray-700 dark:text-gray-200 hover:text-orange-500"
+                    >
+                      My products
+                    </Link>
+                  </>
+                )}
                 <Link
                   href="/profile"
                   className="text-gray-700 dark:text-gray-200 font-medium"
