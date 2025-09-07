@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import { createProduct } from "../lib/product-api";
+import { useRouter } from "next/navigation";
 
 const categories = ["Top Picks", "Best Seller", "Special Offer",];
 const niches = ["living room", "kitchen", "bed room", "dining room", "office"];
 
 export default function ProductForm() {
+  const router = useRouter();
+
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -51,6 +54,7 @@ export default function ProductForm() {
       if (form.image) formData.append("image", form.image); // append file
 
       const res = await createProduct(formData);
+      router.refresh();
       if (res._id) {
         setMessage("✅ Product created successfully!");
         setForm({
