@@ -1,4 +1,19 @@
+import { Metadata } from 'next';
 import HelpAndFaqs from '../components/FAQs';
+
+export const metadata: Metadata = {
+  title: "Help & FAQs | Home Decor",
+  description:
+    "Find answers to frequently asked questions or contact our team for support. Learn how to order, track deliveries, and get assistance.",
+  keywords: [
+    "FAQs",
+    "help",
+    "customer support",
+    "order tracking",
+    "shipping information",
+    "contact us",
+  ],
+};
 
 export default function HelpPage() {
   return (
