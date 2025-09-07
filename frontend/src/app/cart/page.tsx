@@ -15,7 +15,7 @@ import {
 export default function CartPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [updatingProductId, setUpdatingProductId] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
   const router = useRouter();
 
   // Fetch cart from backend
@@ -24,7 +24,8 @@ export default function CartPage() {
       setLoading(true);
       const data = await fetchCart();
       console.log("Cart data:", data); // Debug log
-      setCartItems(Array.isArray(data) ? data : []); // Ensure it's always an array
+      // Ensure we always set an array
+      setCartItems(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to fetch cart:", err);
       setCartItems([]); // Set empty array on error
@@ -37,54 +38,54 @@ export default function CartPage() {
     loadCart();
   }, []);
 
-  // Remove item (using productId, not cart item ID)
-  const handleRemove = async (productId: string) => {
+  // Remove item
+  const handleRemove = async (id: string) => {
     try {
-      setUpdatingProductId(productId);
-      const updatedCart = await removeFromCart(productId);
+      setUpdatingId(id);
+      const updatedCart = await removeFromCart(id);
       setCartItems(Array.isArray(updatedCart) ? updatedCart : []);
     } catch (err) {
       console.error(err);
       alert("Failed to remove item");
     } finally {
-      setUpdatingProductId(null);
+      setUpdatingId(null);
     }
   };
 
-  // Increase quantity (using productId, not cart item ID)
-  const handleIncrease = async (productId: string, currentQty: number) => {
+  // Increase quantity
+  const handleIncrease = async (id: string, currentQty: number) => {
     try {
-      setUpdatingProductId(productId);
-      const updatedCart = await updateCartItem(productId, currentQty + 1);
+      setUpdatingId(id);
+      const updatedCart = await updateCartItem(id, currentQty + 1);
       setCartItems(Array.isArray(updatedCart) ? updatedCart : []);
     } catch (err) {
       console.error(err);
       alert("Failed to update quantity");
     } finally {
-      setUpdatingProductId(null);
+      setUpdatingId(null);
     }
   };
 
-  // Decrease quantity (using productId, not cart item ID)
-  const handleDecrease = async (productId: string, currentQty: number) => {
+  // Decrease quantity
+  const handleDecrease = async (id: string, currentQty: number) => {
     if (currentQty <= 1) return; // Don't allow 0 quantity
     try {
-      setUpdatingProductId(productId);
-      const updatedCart = await updateCartItem(productId, currentQty - 1);
+      setUpdatingId(id);
+      const updatedCart = await updateCartItem(id, currentQty - 1);
       setCartItems(Array.isArray(updatedCart) ? updatedCart : []);
     } catch (err) {
       console.error(err);
       alert("Failed to update quantity");
     } finally {
-      setUpdatingProductId(null);
+      setUpdatingId(null);
     }
   };
 
-  // Checkout
+  // Checkout - FIXED
   const handleCheckout = async () => {
     try {
-      const emptiedCart = await checkoutCart();
-      setCartItems(Array.isArray(emptiedCart) ? emptiedCart : []);
+      await checkoutCart(); // Don't rely on the return value
+      setCartItems([]); // Always set to empty array after successful checkout
       alert("Checkout successful!");
     } catch (err) {
       console.error(err);
@@ -92,14 +93,17 @@ export default function CartPage() {
     }
   };
 
-  // Calculate total price - with error protection
-  const totalPrice = Array.isArray(cartItems) ? cartItems.reduce((sum, item) => {
-    const product = item.productId;
-    if (!product) return sum;
-    
-    const price = product.discountedPrice ?? product.initialPrice ?? 0;
-    return sum + price * item.quantity;
-  }, 0) : 0;
+  // Calculate total price - DEFENSIVE PROGRAMMING ADDED
+  const totalPrice = Array.isArray(cartItems) && cartItems.length > 0
+    ? cartItems.reduce((sum, item) => {
+        // Handle both possible structures
+        const product = item.productId || item.product;
+        if (!product) return sum;
+        
+        const price = product.discountedPrice ?? product.initialPrice ?? 0;
+        return sum + price * item.quantity;
+      }, 0)
+    : 0;
 
   if (loading) {
     return <p className="text-center mt-20">Loading cart...</p>;
@@ -124,7 +128,8 @@ export default function CartPage() {
       <h1 className="text-3xl font-bold mb-8">My Cart</h1>
       <div className="space-y-6">
         {cartItems.map(item => {
-          const product = item.productId;
+          // Handle both possible product structures
+          const product = item.productId || item.product;
           
           if (!product) {
             console.error("No product data found for cart item:", item);
@@ -133,7 +138,6 @@ export default function CartPage() {
 
           const price = product.discountedPrice ?? product.initialPrice ?? 0;
           const itemTotal = price * item.quantity;
-          const isUpdating = updatingProductId === product._id;
 
           return (
             <div
@@ -157,28 +161,28 @@ export default function CartPage() {
                 </p>
                 <div className="flex gap-2 mt-2">
                   <button
-                    onClick={() => handleDecrease(product._id, item.quantity)}
-                    disabled={isUpdating}
-                    className="px-3 py-1 bg-gray-700 text-white rounded-lg disabled:opacity-50"
+                    onClick={() => handleDecrease(item._id, item.quantity)}
+                    disabled={updatingId === item._id}
+                    className="px-3 py-1 bg-gray-700 text-white rounded-lg"
                   >
                     -
                   </button>
                   <span className="px-3 py-1 border rounded-lg">{item.quantity}</span>
                   <button
-                    onClick={() => handleIncrease(product._id, item.quantity)}
-                    disabled={isUpdating}
-                    className="px-3 py-1 bg-gray-700 text-white rounded-lg disabled:opacity-50"
+                    onClick={() => handleIncrease(item._id, item.quantity)}
+                    disabled={updatingId === item._id}
+                    className="px-3 py-1 bg-gray-700 text-white rounded-lg"
                   >
                     +
                   </button>
                 </div>
               </div>
               <button
-                onClick={() => handleRemove(product._id)}
-                disabled={isUpdating}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 disabled:opacity-50"
+                onClick={() => handleRemove(item._id)}
+                disabled={updatingId === item._id}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500"
               >
-                {isUpdating ? "Updating..." : "Remove"}
+                {updatingId === item._id ? "Updating..." : "Remove"}
               </button>
             </div>
           );
