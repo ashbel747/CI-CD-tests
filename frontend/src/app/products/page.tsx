@@ -39,7 +39,7 @@ export default function ProductsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-800 p-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
         Our Products
       </h1>
@@ -63,7 +63,7 @@ export default function ProductsPage() {
 
         return (
           <div key={category} className="mb-16">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center capitalize">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 text-center capitalize">
               {category.replace("-", " ")}
             </h2>
 
@@ -86,7 +86,7 @@ export default function ProductsPage() {
 
         return (
           <div key={niche} className="mb-16">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center capitalize">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 text-center capitalize">
               {niche.replace("-", " ")}
             </h2>
 
@@ -107,7 +107,7 @@ export default function ProductsPage() {
 // ✅ Product Card
 function ProductCard({ product }: { product: Product }) {
   return (
-    <div className="bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition cursor-pointer">
+    <div className="bg-white dark:bg-gray-800 shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition cursor-pointer">
       <Link href={`/products/${product._id}`}>
         <div className="relative">
           {product.image && (
@@ -128,7 +128,7 @@ function ProductCard({ product }: { product: Product }) {
         </div>
 
         <div className="p-4">
-          <h2 className="text-lg font-semibold text-gray-800">
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
             {product.name}
           </h2>
 

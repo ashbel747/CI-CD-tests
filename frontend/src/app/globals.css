@@ -118,7 +118,3 @@ body {
   transition-duration: 0.2s;
   transition-timing-function: ease-in-out;
 }
-
-.focus-ring {
-  focus-ring-color: var(--color-orange-500);
-}

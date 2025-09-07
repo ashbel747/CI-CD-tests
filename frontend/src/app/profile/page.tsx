@@ -28,6 +28,14 @@ export default function ProfilePage() {
     fetchProfile();
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userId');
+    setUser(null);
+    window.location.href = '/'; // redirect after logout
+  };
+
   if (loading) return <p className="p-4">Loading...</p>;
 
   if (!user) return <p className="p-4">Could not load profile</p>;
@@ -38,11 +46,10 @@ export default function ProfilePage() {
     { icon: <Bell size={20} />, label: 'Notification', href: `/notifications` },
     { icon: <Settings size={20} />, label: 'Settings', href: `/settings` },
     { icon: <Bot size={20} />, label: 'Help', href: `/help`},
-    { icon: <LogOut size={20} />, label: 'Logout', href: `/logout` },
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-800 text-black dark:text-white min-h-screen">
+    <div className="bg-white dark:bg-gray-800 text-black dark:text-white min-h-screen mt-11">
       <div className="flex justify-between items-center p-4">
         <ChevronLeft size={24} className="text-black dark:text-white" />
         <h1 className="text-xl font-bold text-pink-600">My Profile</h1>
@@ -82,6 +89,10 @@ export default function ProfilePage() {
             <Link href={item.href} className="text-base text-[#F3E0DB]">{item.label}</Link>
           </div>
         ))}
+        <div className="flex items-center space-x-4">
+          <div className="p-3 bg-[#3F2E31] rounded-full text-[#F3E0DB]"><LogOut /></div>
+          <button onClick={handleLogout} className="text-base text-[#F3E0DB]">Logout</button>
+        </div>
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import { RolesModule } from './roles/role.module';
 import { TestController } from '../test/test.controller';
 import { ProductsModule } from './products/products.module';
 import { CartModule } from './cart/cart.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import config from './config/config';
 
 @Module({
@@ -37,6 +38,7 @@ import config from './config/config';
     RolesModule,
     ProductsModule,
     CartModule,
+    NotificationsModule,
   ],
   controllers: [AppController, TestController],
   providers: [AppService],
