@@ -9,6 +9,9 @@ import ReviewForm from "../../components/ReviewForm";
 import toast from "react-hot-toast";
 import { addToCart } from "../../lib/cart-api";
 import { isLoggedIn } from "../../lib/auth";
+import { useWishlist } from "@/app/context/WishlistContext";
+import { HeartIcon } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -17,6 +20,8 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [addingToCart, setAddingToCart] = useState(false);
+
+  const { isWishlisted, toggleItem, loading: wishlistLoading } = useWishlist();
 
   async function loadProduct() {
     try {
@@ -47,11 +52,10 @@ export default function ProductDetailPage() {
       setAddingToCart(true);
       await addToCart(product._id, 1);
       toast.success(`${product.name} added to cart!`);
-      // Redirect to the cart page after a successful addition
-      router.push("/cart"); 
+      router.push("/cart");
     } catch (err: any) {
       console.error("Add to cart error:", err);
-      
+
       if (err.message === "AUTHENTICATION_REQUIRED") {
         toast.error("Please log in to add items to cart");
         router.push("/login");
@@ -66,8 +70,13 @@ export default function ProductDetailPage() {
     }
   };
 
+  const handleToggleWishlist = () => {
+    if (!product) return;
+    toggleItem(product._id);
+  };
+
   if (loading) return <p className="text-center mt-20">Loading product...</p>;
-  
+
   if (error || !product)
     return (
       <div className="text-center mt-20">
@@ -100,6 +109,18 @@ export default function ProductDetailPage() {
               -{product.discountPercent}% OFF
             </div>
           )}
+          {/* Wishlist Button on detail page */}
+          <button
+            onClick={handleToggleWishlist}
+            className="absolute top-4 left-4 p-3 rounded-full bg-white dark:bg-gray-900 shadow-xl text-gray-500 hover:text-red-500 transition disabled:opacity-50"
+            disabled={wishlistLoading}
+          >
+            {isWishlisted(product._id) ? (
+              <HeartIconSolid className="h-8 w-8 text-red-500" />
+            ) : (
+              <HeartIcon className="h-8 w-8" />
+            )}
+          </button>
           <div className="p-8">
             <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
             <h4 className="text-lg mt-3">{product.description}</h4>
@@ -117,7 +138,7 @@ export default function ProductDetailPage() {
                 <span className="text-4xl font-bold text-green-400">Ksh {product.initialPrice.toLocaleString()}</span>
               )}
             </div>
-            
+
             {userLoggedIn ? (
               <button
                 onClick={handleAddToCart}
@@ -143,7 +164,7 @@ export default function ProductDetailPage() {
             <ReviewList reviews={product.reviews || []} />
           </>
         )}
-        
+
         {!userLoggedIn && (
           <div className="text-center py-8 card-bg rounded-xl border border-gray-700">
             <p className="text-gray-400 mb-4">Login to see reviews and add your own!</p>
