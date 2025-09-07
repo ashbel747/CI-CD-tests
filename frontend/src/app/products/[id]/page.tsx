@@ -102,6 +102,7 @@ export default function ProductDetailPage() {
           )}
           <div className="p-8">
             <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
+            <h4 className="text-lg mt-3">{product.description}</h4>
             <div className="mb-8">
               {discountedPrice ? (
                 <div className="flex items-center gap-4 flex-wrap">

@@ -1,13 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import {
   fetchNotifications,
   deleteNotification,
   markAsRead,
   Notification,
 } from "../lib/notifications-api";
-import { getUserProfile } from "../lib/profile-api";
+import { getUserProfile, UserProfile } from "../lib/profile-api";
+
+interface NotificationCardProps {
+  notification: Notification;
+  onDelete: (id: string) => void;
+  onToggleRead: (id: string, checked: boolean) => void;
+}
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -21,12 +27,16 @@ export default function NotificationsPage() {
         const token = localStorage.getItem("accessToken");
         if (!token) throw new Error("No token found");
 
-        const profile = await getUserProfile(token);
+        const profile: UserProfile = await getUserProfile(token);
 
         const data = await fetchNotifications(profile._id);
         setNotifications(data);
-      } catch (err) {
-        console.error("Error loading notifications:", err);
+      } catch (err:unknown) {
+        if (err instanceof Error) {
+          console.error("Error loading notifications:", err);
+        } else {
+          console.error("Unexpected error", err);
+        } 
       } finally {
         setLoading(false);
       }
@@ -81,16 +91,12 @@ export default function NotificationsPage() {
   );
 }
 
-// ✅ Reusable Notification Card
-function NotificationCard({
+// Notifictaions card
+const NotificationCard: FC<NotificationCardProps> = ({
   notification,
   onDelete,
   onToggleRead,
-}: {
-  notification: Notification;
-  onDelete: (id: string) => void;
-  onToggleRead: (id: string, checked: boolean) => void;
-}) {
+}) => {
   return (
     <div
       className={`bg-white dark:bg-gray-600 rounded-xl shadow-md p-4 flex justify-between items-center hover:shadow-lg transition ${
@@ -105,7 +111,7 @@ function NotificationCard({
       </div>
 
       <div className="flex gap-4 items-center">
-        {/* ✅ Checkbox to toggle read */}
+        {/* Checkbox to toggle read */}
         <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
           <input
             type="checkbox"
@@ -125,4 +131,4 @@ function NotificationCard({
       </div>
     </div>
   );
-}
+};
