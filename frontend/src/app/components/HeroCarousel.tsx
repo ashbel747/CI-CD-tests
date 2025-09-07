@@ -1,10 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
-const slides = [
+// Slide type
+type Slide = {
+  id: number;
+  image: string;
+  title: string;
+  subtitle: string;
+  offer: string;
+  discount: string;
+};
+
+const slides: Slide[] = [
   {
     id: 1,
     image: "/carousel1.jpeg",
@@ -31,8 +41,8 @@ const slides = [
   },
 ];
 
-export default function HeroCarousel() {
-  const [current, setCurrent] = useState(0);
+const HeroCarousel: React.FC = () => {
+  const [current, setCurrent] = useState<number>(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -42,7 +52,10 @@ export default function HeroCarousel() {
   }, []);
 
   return (
-    <div className="relative w-full h-[50vh] overflow-hidden rounded-xl shadow-lg">
+    <section
+      className="relative w-full h-[50vh] md:h-[70vh] overflow-hidden shadow-lg mt-11"
+      aria-label="Promotional Furniture Carousel"
+    >
       <AnimatePresence mode="wait">
         <motion.div
           key={slides[current].id}
@@ -54,29 +67,34 @@ export default function HeroCarousel() {
         >
           <Image
             src={slides[current].image}
-            alt={slides[current].title}
+            alt={`${slides[current].title} - ${slides[current].subtitle}`}
             fill
             className="object-cover"
-            priority
+            priority={current === 0} // only preload first image
           />
 
           {/* Overlay */}
           <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-8 md:px-16 text-white">
-            <h2 className="text-3xl md:text-4xl font-bold">
+            <h1 className="text-3xl md:text-5xl font-bold">
               {slides[current].title}
-            </h2>
-            <p className="text-lg md:text-xl mb-4">{slides[current].subtitle}</p>
+            </h1>
+            <p className="text-lg md:text-xl mb-4">
+              {slides[current].subtitle}
+            </p>
 
-            <div className="bg-white/80 text-black p-4 rounded-lg max-w-sm">
-              <h3 className="font-bold">{slides[current].offer}</h3>
+            <aside className="bg-white/80 text-black p-4 rounded-lg max-w-sm">
+              <h2 className="font-bold">{slides[current].offer}</h2>
               <p className="text-sm">{slides[current].discount}</p>
-            </div>
+            </aside>
           </div>
         </motion.div>
       </AnimatePresence>
 
       {/* Dots Navigation */}
-      <div className="absolute bottom-4 w-full flex justify-center gap-2">
+      <nav
+        className="absolute bottom-4 w-full flex justify-center gap-2"
+        aria-label="Carousel Navigation"
+      >
         {slides.map((_, index) => (
           <button
             key={index}
@@ -84,9 +102,13 @@ export default function HeroCarousel() {
             className={`w-3 h-3 rounded-full transition ${
               index === current ? "bg-white" : "bg-gray-400"
             }`}
+            aria-label={`Go to slide ${index + 1}`}
+            aria-pressed={index === current}
           />
         ))}
-      </div>
-    </div>
+      </nav>
+    </section>
   );
-}
+};
+
+export default HeroCarousel;

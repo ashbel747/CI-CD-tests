@@ -1,28 +1,36 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { fetchProducts, Product } from "../lib/product-api";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function ProductsPage() {
+// Props for ProductGroup
+interface ProductGroupProps {
+  title: string;
+  products: Product[];
+}
+
+// Props for ProductCard
+interface ProductCardProps {
+  product: Product;
+}
+
+// Main Products Page
+const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState<string>("");
 
   useEffect(() => {
     const loadProducts = async () => {
-      const allProducts = await fetchProducts();
+      const allProducts: Product[] = await fetchProducts();
 
-      // Apply client-side search filtering
-      const filtered = allProducts.filter((p: Product) => {
-        const query = search.toLowerCase();
-        return (
-          p.name.toLowerCase().includes(query) ||
-          p.description.toLowerCase().includes(query) ||
-          p.category.toLowerCase().includes(query) ||
-          p.niche.toLowerCase().includes(query)
-        );
-      });
+      const query = search.toLowerCase();
+      const filtered = allProducts.filter((p: Product) =>
+        [p.name, p.description, p.category, p.niche]
+          .map((field) => field.toLowerCase())
+          .some((field) => field.includes(query))
+      );
 
       setProducts(filtered);
     };
@@ -30,98 +38,92 @@ export default function ProductsPage() {
     loadProducts();
   }, [search]);
 
-  // Normalize values for grouping
-  const categories = Array.from(
+  // Grouping logic
+  const categories: string[] = Array.from(
     new Set(products.map((p) => p.category.trim().toLowerCase()))
   );
-  const niches = Array.from(
+  const niches: string[] = Array.from(
     new Set(products.map((p) => p.niche.trim().toLowerCase()))
   );
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-800 p-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+      <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-6 text-center">
         Our Products
       </h1>
 
-      {/* 🔍 Search Input */}
+      {/* Search Input */}
       <div className="flex justify-center mb-12">
         <input
           type="text"
           placeholder="Search products by name, category, or niche..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setSearch(e.target.value)
+          }
           className="w-full max-w-lg p-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-pink-300 dark:bg-white text-black"
         />
       </div>
 
-      {/* Loop through categories */}
-      {categories.map((category) => {
-        const categoryProducts = products.filter(
+      {/* Categories */}
+      {categories.map((category: string) => {
+        const categoryProducts: Product[] = products.filter(
           (p) => p.category.trim().toLowerCase() === category
         );
-
         return (
-          <div key={category} className="mb-16">
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 text-center capitalize">
-              {category.replace("-", " ")}
-            </h2>
-
-            <div className="flex gap-6 overflow-x-auto scrollbar-hide px-2">
-              {categoryProducts.map((product) => (
-                <div key={product._id} className="flex-none w-80">
-                  <ProductCard product={product} />
-                </div>
-              ))}
-            </div>
-          </div>
+          <ProductGroup key={category} title={category} products={categoryProducts} />
         );
       })}
 
-      {/* Loop through niches */}
-      {niches.map((niche) => {
-        const nicheProducts = products.filter(
+      {/* Niches */}
+      {niches.map((niche: string) => {
+        const nicheProducts: Product[] = products.filter(
           (p) => p.niche.trim().toLowerCase() === niche
         );
-
-        return (
-          <div key={niche} className="mb-16">
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 text-center capitalize">
-              {niche.replace("-", " ")}
-            </h2>
-
-            <div className="flex gap-6 overflow-x-auto scrollbar-hide px-2">
-              {nicheProducts.map((product) => (
-                <div key={product._id} className="flex-none w-80">
-                  <ProductCard product={product} />
-                </div>
-              ))}
-            </div>
-          </div>
-        );
+        return <ProductGroup key={niche} title={niche} products={nicheProducts} />;
       })}
     </div>
   );
-}
+};
 
-// ✅ Product Card
-function ProductCard({ product }: { product: Product }) {
+// Grouping Component
+const ProductGroup: React.FC<ProductGroupProps> = ({ title, products }) => (
+  <div className="mb-16">
+    <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 text-center capitalize">
+      {title.replace("-", " ")}
+    </h2>
+    <div className="flex gap-6 overflow-x-auto scrollbar-hide px-2">
+      {products.map((product: Product) => (
+        <div key={product._id} className="flex-none w-80">
+          <ProductCard product={product} />
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// Product Card Component
+const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const discountedPrice: number | string = product.discountPercent
+    ? (
+        product.initialPrice *
+        (1 - product.discountPercent / 100)
+      ).toFixed(0)
+    : product.initialPrice;
+
   return (
     <div className="bg-white dark:bg-gray-800 shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition cursor-pointer">
       <Link href={`/products/${product._id}`}>
         <div className="relative">
-          {product.image && (
-            <Image
-              src={product.image || "/placeholder.png"}
-              alt={product.name}
-              width={500}
-              height={200}
-              className="h-48 w-full object-cover"
-            />
-          )}
-
+          <Image
+            src={product.image || "/placeholder.png"}
+            alt={product.name}
+            width={500}
+            height={200}
+            className="h-48 w-full object-cover"
+          />
           {product.discountPercent && (
-            <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+            <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded shadow-md">
               -{product.discountPercent}%
             </span>
           )}
@@ -138,13 +140,7 @@ function ProductCard({ product }: { product: Product }) {
                 <span className="text-gray-400 line-through">
                   Ksh {product.initialPrice}
                 </span>
-                <span className="text-green-600 font-bold">
-                  Ksh{" "}
-                  {(
-                    product.initialPrice *
-                    (1 - product.discountPercent / 100)
-                  ).toFixed(0)}
-                </span>
+                <span className="text-green-600 font-bold">Ksh {discountedPrice}</span>
               </>
             ) : (
               <span className="text-green-600 font-bold">
@@ -154,15 +150,13 @@ function ProductCard({ product }: { product: Product }) {
           </div>
 
           <div className="flex justify-between text-sm text-gray-500">
-            <span className="px-2 py-1 bg-gray-100 rounded-lg">
-              {product.niche}
-            </span>
-            <span className="px-2 py-1 bg-gray-100 rounded-lg">
-              {product.category}
-            </span>
+            <span className="px-2 py-1 bg-gray-100 rounded-lg">{product.niche}</span>
+            <span className="px-2 py-1 bg-gray-100 rounded-lg">{product.category}</span>
           </div>
         </div>
       </Link>
     </div>
   );
-}
+};
+
+export default ProductsPage;
