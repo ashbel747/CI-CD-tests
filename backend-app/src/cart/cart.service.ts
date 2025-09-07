@@ -31,7 +31,13 @@ export class CartService {
     }
 
     await user.save();
-    return user.cart;
+
+    // Re-fetch the user and populate the cart to return consistent data
+    const updatedUser = await this.userModel
+      .findById(userId)
+      .populate('cart.productId')
+      .exec();
+    return updatedUser.cart;
   }
 
   async getCart(userId: string) {
@@ -61,7 +67,13 @@ export class CartService {
     }
 
     await user.save();
-    return user.cart;
+
+    // Re-fetch the user and populate the cart to return consistent data
+    const updatedUser = await this.userModel
+      .findById(userId)
+      .populate('cart.productId')
+      .exec();
+    return updatedUser.cart;
   }
 
   async checkout(userId: string) {

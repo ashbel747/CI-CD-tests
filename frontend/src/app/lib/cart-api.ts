@@ -1,7 +1,6 @@
-// app/lib/cart-api.ts
+import {isLoggedIn,apiCall} from './auth'
 
 export type CartItem = {
-  _id: string;        // Cart item ID in user's cart
   productId: {        // Product object (populated)
     _id: string;
     name: string;
@@ -11,106 +10,95 @@ export type CartItem = {
     category?: string;
     niche?: string;
   };
-  quantity: number;   // Quantity of this product
+  quantity: number;
+};
+
+// Helper function to check authentication before cart operations
+const requireAuth = (): void => {
+  if (!isLoggedIn()) {
+    throw new Error("AUTHENTICATION_REQUIRED");
+  }
 };
 
 // -------------------- Cart API Functions --------------------
 
 // Fetch all items in the cart
 export const fetchCart = async (): Promise<CartItem[]> => {
-  const token = localStorage.getItem("accessToken");
-  const res = await fetch("http://localhost:3000/cart", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  requireAuth();
+  
+  const response = await apiCall('/cart');
 
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`Failed to fetch cart: ${res.status} ${error}`);
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to fetch cart: ${response.status} ${error}`);
   }
 
-  return res.json();
+  return response.json();
 };
 
 // Add a product to the cart
 export const addToCart = async (productId: string, quantity: number = 1): Promise<CartItem[]> => {
-  const token = localStorage.getItem("accessToken");
+  requireAuth();
 
-  const res = await fetch("http://localhost:3000/cart", {
+  const response = await apiCall('/cart', {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify({ productId, quantity }),
   });
 
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`Failed to add to cart: ${res.status} ${error}`);
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to add to cart: ${response.status} ${error}`);
   }
 
-  return res.json(); // backend returns updated cart
+  return response.json();
 };
 
 // Remove an item from the cart (set quantity to 0)
 export const removeFromCart = async (productId: string): Promise<CartItem[]> => {
-  const token = localStorage.getItem("accessToken");
+  requireAuth();
 
-  const res = await fetch("http://localhost:3000/cart", {
+  const response = await apiCall('/cart', {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify({ productId, quantity: 0 }),
   });
 
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`Failed to remove item: ${res.status} ${error}`);
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to remove item: ${response.status} ${error}`);
   }
 
-  return res.json(); // backend returns updated cart
+  return response.json();
 };
 
 // Update the quantity of a cart item
 export const updateCartItem = async (productId: string, quantity: number): Promise<CartItem[]> => {
-  const token = localStorage.getItem("accessToken");
+  requireAuth();
 
-  const res = await fetch("http://localhost:3000/cart", {
+  const response = await apiCall('/cart', {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify({ productId, quantity }),
   });
 
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`Failed to update cart item: ${res.status} ${error}`);
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to update cart item: ${response.status} ${error}`);
   }
 
-  return res.json(); // backend returns updated cart
+  return response.json();
 };
 
 // Checkout cart (clears cart)
-export const checkoutCart = async (): Promise<CartItem[]> => {
-  const token = localStorage.getItem("accessToken");
+export const checkoutCart = async (): Promise<{ message: string }> => {
+  requireAuth();
 
-  const res = await fetch("http://localhost:3000/cart/checkout", {
+  const response = await apiCall('/cart/checkout', {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`Failed to checkout: ${res.status} ${error}`);
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to checkout: ${response.status} ${error}`);
   }
 
-  return res.json(); // backend returns empty cart
+  return response.json();
 };
