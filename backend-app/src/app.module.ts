@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RolesModule } from './roles/role.module';
 import { TestController } from '../test/test.controller';
 import { ProductsModule } from './products/products.module';
+import { CartModule } from './cart/cart.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import config from './config/config';
 
@@ -36,6 +37,7 @@ import config from './config/config';
     AuthModule,
     RolesModule,
     ProductsModule,
+    CartModule,
     NotificationsModule,
   ],
   controllers: [AppController, TestController],

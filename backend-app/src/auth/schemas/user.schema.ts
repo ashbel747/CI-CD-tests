@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Role } from '../../roles/schemas/role.schema';
 
-export type UserDocument = User & Document; // ✅ add this
+export type UserDocument = User & Document;
 
 @Schema()
 export class User {
@@ -20,6 +20,18 @@ export class User {
 
   @Prop({ required: true, enum: ['buyer', 'seller'] })
   role: string;
+
+  // ✅ Add cart array for MVP
+  @Prop({
+    type: [
+      {
+        productId: { type: Types.ObjectId, ref: 'Product', required: true },
+        quantity: { type: Number, default: 1 },
+      },
+    ],
+    default: [],
+  })
+  cart: { productId: string; quantity: number }[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
