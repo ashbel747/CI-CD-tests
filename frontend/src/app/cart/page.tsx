@@ -2,33 +2,28 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import {
   fetchCart,
-  addToCart,
   removeFromCart,
   updateCartItem,
-  checkoutCart,
-  CartItem,
 } from "../lib/cart-api";
+import CheckoutModal from '../components/CheckoutModal';
+import toast, { Toaster } from 'react-hot-toast'; // Import toast and Toaster
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const router = useRouter();
+  const [updatingProductId, setUpdatingProductId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Fetch cart from backend
   async function loadCart() {
     try {
       setLoading(true);
       const data = await fetchCart();
-      console.log("Cart data:", data); // Debug log
-      // Ensure we always set an array
       setCartItems(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to fetch cart:", err);
-      setCartItems([]); // Set empty array on error
+      setCartItems([]);
     } finally {
       setLoading(false);
     }
@@ -38,68 +33,62 @@ export default function CartPage() {
     loadCart();
   }, []);
 
-  // Remove item
-  const handleRemove = async (id: string) => {
+  const handleRemove = async (productId: string) => {
     try {
-      setUpdatingId(id);
-      const updatedCart = await removeFromCart(id);
+      setUpdatingProductId(productId);
+      const updatedCart = await removeFromCart(productId);
       setCartItems(Array.isArray(updatedCart) ? updatedCart : []);
+      toast.success("Item removed successfully!");
     } catch (err) {
       console.error(err);
-      alert("Failed to remove item");
+      toast.error("Failed to remove item.");
     } finally {
-      setUpdatingId(null);
+      setUpdatingProductId(null);
     }
   };
 
-  // Increase quantity
-  const handleIncrease = async (id: string, currentQty: number) => {
+  const handleIncrease = async (productId: string, currentQty: number) => {
     try {
-      setUpdatingId(id);
-      const updatedCart = await updateCartItem(id, currentQty + 1);
+      setUpdatingProductId(productId);
+      const updatedCart = await updateCartItem(productId, currentQty + 1);
       setCartItems(Array.isArray(updatedCart) ? updatedCart : []);
+      toast.success("Quantity updated!");
     } catch (err) {
       console.error(err);
-      alert("Failed to update quantity");
+      toast.error("Failed to update quantity.");
     } finally {
-      setUpdatingId(null);
+      setUpdatingProductId(null);
     }
   };
 
-  // Decrease quantity
-  const handleDecrease = async (id: string, currentQty: number) => {
-    if (currentQty <= 1) return; // Don't allow 0 quantity
+  const handleDecrease = async (productId: string, currentQty: number) => {
+    if (currentQty <= 1) {
+      toast.error("Quantity cannot be less than 1.");
+      return;
+    }
     try {
-      setUpdatingId(id);
-      const updatedCart = await updateCartItem(id, currentQty - 1);
+      setUpdatingProductId(productId);
+      const updatedCart = await updateCartItem(productId, currentQty - 1);
       setCartItems(Array.isArray(updatedCart) ? updatedCart : []);
+      toast.success("Quantity updated!");
     } catch (err) {
       console.error(err);
-      alert("Failed to update quantity");
+      toast.error("Failed to update quantity.");
     } finally {
-      setUpdatingId(null);
+      setUpdatingProductId(null);
     }
   };
 
-  // Checkout - FIXED
-  const handleCheckout = async () => {
-    try {
-      await checkoutCart(); // Don't rely on the return value
-      setCartItems([]); // Always set to empty array after successful checkout
-      alert("Checkout successful!");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to checkout");
-    }
+  const handleCheckoutSuccess = () => {
+    setCartItems([]);
+    setIsModalOpen(false);
+    toast.success("Checkout successful! Your cart has been cleared.");
   };
 
-  // Calculate total price - DEFENSIVE PROGRAMMING ADDED
   const totalPrice = Array.isArray(cartItems) && cartItems.length > 0
     ? cartItems.reduce((sum, item) => {
-        // Handle both possible structures
-        const product = item.productId || item.product;
-        if (!product) return sum;
-        
+        const product = item.productId;
+        if (!product || typeof product === 'string') return sum;
         const price = product.discountedPrice ?? product.initialPrice ?? 0;
         return sum + price * item.quantity;
       }, 0)
@@ -114,7 +103,7 @@ export default function CartPage() {
       <div className="text-center mt-20">
         <p className="text-xl mb-4">Your cart is empty.</p>
         <button
-          onClick={() => router.push("/products")}
+          onClick={() => window.location.href = "/products"}
           className="custom-button px-6 py-3 rounded-lg"
         >
           Browse Products
@@ -125,19 +114,23 @@ export default function CartPage() {
 
   return (
     <div className="max-w-5xl mx-auto py-10 px-4">
+      <Toaster /> {/* Add the Toaster component */}
       <h1 className="text-3xl font-bold mb-8">My Cart</h1>
       <div className="space-y-6">
-        {cartItems.map(item => {
-          // Handle both possible product structures
-          const product = item.productId || item.product;
-          
-          if (!product) {
-            console.error("No product data found for cart item:", item);
-            return null;
+        {cartItems.map((item, index) => {
+          const product = item.productId;
+
+          if (!product || typeof product === 'string') {
+            return (
+              <div key={`error-${index}`} className="text-red-500 p-4 border border-red-300 rounded">
+                Error: Product data is missing or invalid.
+              </div>
+            );
           }
 
           const price = product.discountedPrice ?? product.initialPrice ?? 0;
           const itemTotal = price * item.quantity;
+          const isUpdating = updatingProductId === product._id;
 
           return (
             <div
@@ -145,11 +138,15 @@ export default function CartPage() {
               className="flex items-center gap-4 border-b border-gray-700 pb-4"
             >
               <Image
-                src={product.image ?? "/placeholder.png"}
+                src={product.image || "/placeholder.png"}
                 alt={product.name || "Product"}
                 width={120}
                 height={120}
                 className="object-cover rounded-lg"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' fill='%23666'%3E%3Crect width='120' height='120' rx='8'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' font-size='14' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E";
+                }}
               />
               <div className="flex-1">
                 <h2 className="text-xl font-semibold">{product.name}</h2>
@@ -161,28 +158,28 @@ export default function CartPage() {
                 </p>
                 <div className="flex gap-2 mt-2">
                   <button
-                    onClick={() => handleDecrease(item._id, item.quantity)}
-                    disabled={updatingId === item._id}
-                    className="px-3 py-1 bg-gray-700 text-white rounded-lg"
+                    onClick={() => handleDecrease(product._id, item.quantity)}
+                    disabled={isUpdating || item.quantity <= 1}
+                    className="px-3 py-1 bg-gray-700 text-white rounded-lg disabled:opacity-50"
                   >
                     -
                   </button>
                   <span className="px-3 py-1 border rounded-lg">{item.quantity}</span>
                   <button
-                    onClick={() => handleIncrease(item._id, item.quantity)}
-                    disabled={updatingId === item._id}
-                    className="px-3 py-1 bg-gray-700 text-white rounded-lg"
+                    onClick={() => handleIncrease(product._id, item.quantity)}
+                    disabled={isUpdating}
+                    className="px-3 py-1 bg-gray-700 text-white rounded-lg disabled:opacity-50"
                   >
                     +
                   </button>
                 </div>
               </div>
               <button
-                onClick={() => handleRemove(item._id)}
-                disabled={updatingId === item._id}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500"
+                onClick={() => handleRemove(product._id)}
+                disabled={isUpdating}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 disabled:opacity-50"
               >
-                {updatingId === item._id ? "Updating..." : "Remove"}
+                {isUpdating ? "Updating..." : "Remove"}
               </button>
             </div>
           );
@@ -192,12 +189,18 @@ export default function CartPage() {
       <div className="mt-8 flex justify-between items-center">
         <h2 className="text-2xl font-bold">Total: Ksh {totalPrice.toLocaleString()}</h2>
         <button
-          onClick={handleCheckout}
+          onClick={() => setIsModalOpen(true)}
           className="custom-button px-6 py-3 rounded-lg"
         >
           Checkout
         </button>
       </div>
+
+      <CheckoutModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCheckoutSuccess={handleCheckoutSuccess}
+      />
     </div>
   );
 }

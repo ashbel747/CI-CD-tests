@@ -1,32 +1,36 @@
 "use client";
 
-import { FC } from "react";
+import { checkoutCart } from '../lib/cart-api';
+import toast from 'react-hot-toast'; // Import toast
 
-type CheckoutModalProps = {
-  total: number;
-  onConfirm: () => void;
-  onCancel: () => void;
-  open: boolean;
-};
+export default function CheckoutModal({ isOpen, onClose, onCheckoutSuccess }) {
+  if (!isOpen) return null;
 
-const CheckoutModal: FC<CheckoutModalProps> = ({ total, onConfirm, onCancel, open }) => {
-  if (!open) return null;
+  const handleConfirmCheckout = async () => {
+    try {
+      await checkoutCart();
+      onCheckoutSuccess();
+    } catch (error) {
+      console.error("Checkout failed:", error);
+      toast.error("Checkout failed. Please try again.");
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-gray-900 text-white rounded-xl p-6 max-w-sm w-full shadow-2xl">
-        <h2 className="text-2xl font-bold mb-4">Confirm Checkout</h2>
-        <p className="mb-6">Your total is <span className="font-semibold">Ksh {total.toLocaleString()}</span></p>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-sm mx-auto">
+        <h2 className="text-2xl font-bold mb-4 text-white">Confirm Order</h2>
+        <p className="text-gray-300 mb-6">Are you sure you want to proceed with the checkout?</p>
         <div className="flex justify-end gap-4">
           <button
-            onClick={onCancel}
-            className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600"
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors"
           >
             Cancel
           </button>
           <button
-            onClick={onConfirm}
-            className="px-4 py-2 bg-green-600 rounded-lg hover:bg-green-500"
+            onClick={handleConfirmCheckout}
+            className="px-4 py-2 custom-button rounded-lg transition-colors"
           >
             Confirm
           </button>
@@ -34,6 +38,4 @@ const CheckoutModal: FC<CheckoutModalProps> = ({ total, onConfirm, onCancel, ope
       </div>
     </div>
   );
-};
-
-export default CheckoutModal;
+}
