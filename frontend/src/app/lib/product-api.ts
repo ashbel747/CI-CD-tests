@@ -131,3 +131,110 @@ export const addReview = async (productId: string, review: { comment: string; ra
 
   return res.json();
 };
+
+
+
+
+// ---------- Cart APIs ----------
+
+export type CartItem = {
+  _id: string;          // cart item ID
+  productId: string;
+  name: string;
+  image?: string;
+  price: number;        // discounted price if applicable
+  quantity: number;
+  subtotal: number;     // price * quantity
+};
+
+// Add item to cart
+export const addToCat = async (productId: string, quantity: number = 1) => {
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`http://localhost:3000/cart`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ productId, quantity }),
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Failed to add to cart: ${res.status} ${error}`);
+  }
+
+  return res.json();
+};
+
+// Get current user cart
+export const fetchCart = async (): Promise<CartItem[]> => {
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`http://localhost:3000/cart`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch cart");
+  }
+
+  return res.json();
+};
+
+// Update item quantity in cart
+export const updateCartItem = async (itemId: string, quantity: number) => {
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`http://localhost:3000/cart/${itemId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ quantity }),
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Failed to update cart item: ${res.status} ${error}`);
+  }
+
+  return res.json();
+};
+
+// Remove item from cart
+export const removeCartItem = async (itemId: string) => {
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`http://localhost:3000/cart/${itemId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to remove cart item: ${res.status}`);
+  }
+
+  return res.json();
+};
+
+// Checkout (MVP: simply clears the cart)
+export const checkoutCart = async () => {
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`http://localhost:3000/cart/checkout`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Failed to checkout: ${res.status} ${error}`);
+  }
+
+  return res.json();
+};
+
