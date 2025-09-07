@@ -37,10 +37,9 @@ export default function ProductDetailPage() {
   const handleAddToCart = async () => {
     if (!product) return;
 
-    // Check if user is logged in
     if (!isLoggedIn()) {
       toast.error("Please log in to add items to cart");
-      router.push("/login"); // Adjust path to your login page
+      router.push("/login");
       return;
     }
 
@@ -48,10 +47,11 @@ export default function ProductDetailPage() {
       setAddingToCart(true);
       await addToCart(product._id, 1);
       toast.success(`${product.name} added to cart!`);
+      // Redirect to the cart page after a successful addition
+      router.push("/cart"); 
     } catch (err: any) {
       console.error("Add to cart error:", err);
       
-      // Handle specific error types
       if (err.message === "AUTHENTICATION_REQUIRED") {
         toast.error("Please log in to add items to cart");
         router.push("/login");
@@ -117,7 +117,6 @@ export default function ProductDetailPage() {
               )}
             </div>
             
-            {/* Add to Cart Button */}
             {userLoggedIn ? (
               <button
                 onClick={handleAddToCart}
@@ -137,7 +136,6 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* Reviews Section - Only show for logged-in users */}
         {userLoggedIn && (
           <>
             <ReviewForm productId={product._id} onReviewAdded={() => loadProduct()} />
@@ -145,7 +143,6 @@ export default function ProductDetailPage() {
           </>
         )}
         
-        {/* Show login prompt for reviews if not logged in */}
         {!userLoggedIn && (
           <div className="text-center py-8 card-bg rounded-xl border border-gray-700">
             <p className="text-gray-400 mb-4">Login to see reviews and add your own!</p>
