@@ -3,8 +3,19 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Product } from "@/app/lib/product-api";
+import { useWishlist } from "@/app/context/WishlistContext";
+import { HeartIcon } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 
 const ProductCard = ({ product }: { product: Product }) => {
+  const { isWishlisted, toggleItem, loading } = useWishlist();
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevents navigating to the product page
+    e.stopPropagation(); // Stops event from bubbling up to the link
+    toggleItem(product._id);
+  };
+
   const discountedPrice: number | string = product.discountPercent
     ? (
         product.initialPrice *
@@ -13,7 +24,7 @@ const ProductCard = ({ product }: { product: Product }) => {
     : product.initialPrice;
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition cursor-pointer">
+    <div className="bg-white dark:bg-gray-800 shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition cursor-pointer relative">
       <Link href={`/products/${product._id}`}>
         <div className="relative">
           <Image
@@ -28,6 +39,18 @@ const ProductCard = ({ product }: { product: Product }) => {
               -{product.discountPercent}%
             </span>
           )}
+          {/* Wishlist Button */}
+          <button
+            onClick={handleToggle}
+            className="absolute top-2 left-2 p-2 rounded-full bg-white dark:bg-gray-900 shadow-lg text-gray-500 hover:text-red-500 transition disabled:opacity-50"
+            disabled={loading}
+          >
+            {isWishlisted(product._id) ? (
+              <HeartIconSolid className="h-6 w-6 text-red-500" />
+            ) : (
+              <HeartIcon className="h-6 w-6" />
+            )}
+          </button>
         </div>
 
         <div className="p-4">

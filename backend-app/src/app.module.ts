@@ -10,6 +10,7 @@ import { TestController } from '../test/test.controller';
 import { ProductsModule } from './products/products.module';
 import { CartModule } from './cart/cart.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 import config from './config/config';
 
 @Module({
@@ -39,6 +40,7 @@ import config from './config/config';
     ProductsModule,
     CartModule,
     NotificationsModule,
+    WishlistModule,
   ],
   controllers: [AppController, TestController],
   providers: [AppService],
