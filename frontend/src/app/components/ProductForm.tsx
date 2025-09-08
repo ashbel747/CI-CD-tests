@@ -170,7 +170,7 @@ export default function ProductForm() {
         {loading ? "Creating..." : "Create Product"}
       </button>
 
-      {message && <p className="text-center mt-2">{message}</p>}
+      {message && <p data-testid="form-message" className="text-center mt-2">{message}</p>}
     </form>
   );
 }
