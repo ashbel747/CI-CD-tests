@@ -40,10 +40,7 @@ export default function ProfilePage() {
   const userProfile = user.userProfile;
 
   const menuItems = [
-    { icon: <Scroll size={20} />, label: 'Privacy Policy', href: `/privacy-policy` },
-    { icon: <IdCard size={20} />, label: 'Payment Methods', href: `/payment-methods` },
     { icon: <Bell size={20} />, label: 'Notification', href: `/notifications` },
-    { icon: <Settings size={20} />, label: 'Settings', href: `/settings` },
     { icon: <Bot size={20} />, label: 'Help', href: `/help` },
   ];
 
