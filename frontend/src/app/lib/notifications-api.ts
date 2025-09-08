@@ -1,3 +1,6 @@
+// lib/notifications-api.ts
+import { apiCall } from './auth';
+
 export type Notification = {
   _id: string;
   userId: string;
@@ -6,30 +9,46 @@ export type Notification = {
   createdAt: string;
 };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-
+/**
+ * Fetch notifications for a specific user using centralized API call
+ */
 export async function fetchNotifications(userId: string): Promise<Notification[]> {
-  const res = await fetch(`${API_BASE}/notifications/user/${userId}`, {
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error("Failed to fetch notifications");
-  return res.json();
+  try {
+    const data = await apiCall(`/notifications/user/${userId}`, {
+      method: 'GET',
+    });
+    return data;
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch notifications';
+    throw new Error(errorMessage);
+  }
 }
 
+/**
+ * Mark a notification as read using centralized API call
+ */
 export async function markAsRead(id: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/notifications/${id}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ read: true }),
-  });
-  if (!res.ok) throw new Error("Failed to mark as read");
+  try {
+    await apiCall(`/notifications/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ read: true }),
+    });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to mark as read';
+    throw new Error(errorMessage);
+  }
 }
 
+/**
+ * Delete a notification using centralized API call
+ */
 export async function deleteNotification(id: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/notifications/${id}`, {
-    method: "DELETE",
-  });
-  if (!res.ok) throw new Error("Failed to delete notification");
+  try {
+    await apiCall(`/notifications/${id}`, {
+      method: 'DELETE',
+    });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to delete notification';
+    throw new Error(errorMessage);
+  }
 }

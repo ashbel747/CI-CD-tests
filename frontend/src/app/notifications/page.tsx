@@ -7,7 +7,7 @@ import {
   markAsRead,
   Notification,
 } from "../lib/notifications-api";
-import { getUserProfile, UserProfile } from "../lib/profile-api";
+import { useAuth } from '../context/authContext'
 
 interface NotificationCardProps {
   notification: Notification;
@@ -16,34 +16,39 @@ interface NotificationCardProps {
 }
 
 export default function NotificationsPage() {
+  const { user, getUserProfile } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadUserAndNotifications = async () => {
+    const loadNotifications = async () => {
       try {
         setLoading(true);
 
-        const token = localStorage.getItem("accessToken");
-        if (!token) throw new Error("No token found");
+        // If user is authenticated but profile not loaded, fetch it
+        if (user?.isAuthenticated && !user?.userProfile) {
+          await getUserProfile();
+          return; // getUserProfile will trigger another useEffect run
+        }
 
-        const profile: UserProfile = await getUserProfile(token);
-
-        const data = await fetchNotifications(profile._id);
-        setNotifications(data);
-      } catch (err:unknown) {
+        // If we have user profile, fetch notifications
+        if (user?.userProfile?._id) {
+          const data = await fetchNotifications(user.userProfile._id);
+          setNotifications(data);
+        }
+      } catch (err: unknown) {
         if (err instanceof Error) {
           console.error("Error loading notifications:", err);
         } else {
           console.error("Unexpected error", err);
-        } 
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    loadUserAndNotifications();
-  }, []);
+    loadNotifications();
+  }, [user?.isAuthenticated, user?.userProfile, getUserProfile]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -69,6 +74,10 @@ export default function NotificationsPage() {
 
   if (loading) return <p className="p-6 text-gray-600">Loading...</p>;
 
+  if (!user?.isAuthenticated || !user?.userProfile) {
+    return <p className="p-6 text-gray-600">Please log in to view notifications.</p>;
+  }
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-800 p-6 mt-11">
       <h1 className="text-3xl font-bold mb-6 text-black dark:text-white">My Notifications</h1>
@@ -91,7 +100,7 @@ export default function NotificationsPage() {
   );
 }
 
-// Notifictaions card
+// Notifications card component
 const NotificationCard: FC<NotificationCardProps> = ({
   notification,
   onDelete,

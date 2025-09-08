@@ -2,75 +2,67 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  getUserProfile,
-  updateUserProfile,
-  UserProfile,
-} from "../../lib/profile-api";
 import { User } from "lucide-react";
+import { useAuth, UserProfile } from '../../context/authContext'
 
 export default function UpdateProfileForm() {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading, updateUserProfile, getUserProfile, error, clearError } = useAuth();
+  const [formData, setFormData] = useState<UserProfile | null>(null);
   const [updating, setUpdating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const router = useRouter();
+
   useEffect(() => {
     const loadProfile = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-          throw new Error("Not authenticated");
-        }
-        const profile = await getUserProfile(token);
-        setUser(profile);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      // If user is authenticated but profile not loaded, fetch it
+      if (user?.isAuthenticated && !user?.userProfile) {
+        await getUserProfile();
+      }
+      
+      // Set form data from user profile
+      if (user?.userProfile) {
+        setFormData(user.userProfile);
       }
     };
 
     loadProfile();
-  }, []);
+  }, [user, getUserProfile]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!user) return;
+    if (!formData) return;
 
     try {
       setUpdating(true);
-      setError(null);
+      clearError();
       setSuccess(null);
 
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        throw new Error("Not authenticated");
-      }
-
-      const updatedUser = await updateUserProfile(token, {
-        name: user.name,
-        email: user.email,
-        role: user.role,
+      await updateUserProfile({
+        name: formData.name,
+        email: formData.email,
+        role: formData.role,
       });
 
-      setUser(updatedUser);
       setSuccess("Profile updated successfully ✅");
+      
+      // Navigate back to profile page
+      setTimeout(() => {
+        router.push("/profile");
+      }, 1500);
 
-      router.push("/profile");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      // Error is already handled by AuthContext
+      console.error("Profile update failed:", err);
     } finally {
       setUpdating(false);
     }
   };
 
-  if (loading)
+  // Show loading if auth is loading or no user data yet
+  if (loading || !user?.isAuthenticated || !formData) {
     return <p className="text-center py-4 text-white">Loading profile...</p>;
-  if (error)
-    return <p className="text-red-500 text-center">{error}</p>;
+  }
 
   return (
     <div className="min-h-screen bg-[#332a2c] text-white p-4">
@@ -79,16 +71,18 @@ export default function UpdateProfileForm() {
           Update Profile
         </h1>
       </div>
+      
       <div className="flex flex-col items-center py-8">
         <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-[#F3E0DB]">
           <User className="w-full h-full object-cover" />
         </div>
 
         <div className="mt-4">
-          <h2 className="text-2xl font-bold text-center">{user?.name}</h2>
-          <p className="text-sm text-gray-400 text-center">{user?.email}</p>
+          <h2 className="text-2xl font-bold text-center">{formData.name}</h2>
+          <p className="text-sm text-gray-400 text-center">{formData.email}</p>
         </div>
       </div>
+      
       <div className="bg-[#241e21] rounded-t-3xl p-6 shadow-xl space-y-4">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-4 text-sm">
@@ -96,26 +90,30 @@ export default function UpdateProfileForm() {
               <label className="block text-gray-400 mb-1">Full Name</label>
               <input
                 type="text"
-                value={user?.name || ""}
+                value={formData.name || ""}
                 onChange={(e) =>
-                  setUser((prev) => prev && { ...prev, name: e.target.value })
+                  setFormData((prev) => prev && { ...prev, name: e.target.value })
                 }
                 className="w-full bg-[#3e3538] border border-transparent rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none"
                 placeholder="Madison Smith"
+                required
               />
             </div>
+            
             <div>
               <label className="block text-gray-400 mb-1">Email</label>
               <input
                 type="email"
-                value={user?.email || ""}
+                value={formData.email || ""}
                 onChange={(e) =>
-                  setUser((prev) => prev && { ...prev, email: e.target.value })
+                  setFormData((prev) => prev && { ...prev, email: e.target.value })
                 }
                 className="w-full bg-[#3e3538] border border-transparent rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none"
                 placeholder="Madisons@Example.Com"
+                required
               />
             </div>
+            
             <div>
               <label className="block text-gray-400 mb-1">Role</label>
               <div className="flex space-x-4">
@@ -125,9 +123,9 @@ export default function UpdateProfileForm() {
                     id="buyer"
                     name="role"
                     value="buyer"
-                    checked={user?.role === "buyer"}
+                    checked={formData.role === "buyer"}
                     onChange={(e) =>
-                      setUser((prev) => prev && { ...prev, role: e.target.value })
+                      setFormData((prev) => prev && { ...prev, role: e.target.value as 'buyer' | 'seller' })
                     }
                     className="hidden peer"
                   />
@@ -144,9 +142,9 @@ export default function UpdateProfileForm() {
                     id="seller"
                     name="role"
                     value="seller"
-                    checked={user?.role === "seller"}
+                    checked={formData.role === "seller"}
                     onChange={(e) =>
-                      setUser((prev) => prev && { ...prev, role: e.target.value })
+                      setFormData((prev) => prev && { ...prev, role: e.target.value as 'buyer' | 'seller' })
                     }
                     className="hidden peer"
                   />
@@ -160,6 +158,7 @@ export default function UpdateProfileForm() {
               </div>
             </div>
           </div>
+          
           <button
             type="submit"
             disabled={updating}
@@ -168,6 +167,7 @@ export default function UpdateProfileForm() {
             {updating ? "Updating..." : "Update Profile"}
           </button>
         </form>
+        
         {success && <p className="text-green-400 mt-4 text-center text-sm">{success}</p>}
         {error && <p className="text-red-400 mt-4 text-center text-sm">{error}</p>}
       </div>

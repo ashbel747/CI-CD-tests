@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { fetchMyProducts, deleteProduct, Product } from "../../lib/product-api";
-
+import { Product } from "../../lib/product-api";
+import  {fetchMyProducts, deleteProduct} from '@/app/lib/product-api-client'
 type ErrorState = {
   message: string;
   status?: number;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createProduct } from "../lib/product-api";
+import { createProduct } from "../lib/product-api-client";
 import { useRouter } from "next/navigation";
 
 const categories = ["Top Picks", "Best Seller", "Special Offer",];

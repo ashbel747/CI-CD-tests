@@ -1,8 +1,7 @@
 // app/profile/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
-import { getUserProfile } from '../lib/profile-api';
+import { useEffect } from 'react';
 import {
   Pencil,
   User,
@@ -16,48 +15,29 @@ import {
   ChevronLeft,
 } from 'lucide-react';
 import Link from 'next/link';
-
-// Define a User type based on your backend response
-export interface UserProfile {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-}
+import { useAuth } from '../context/authContext'
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { user, loading, getUserProfile, logout } = useAuth();
 
   useEffect(() => {
-    async function fetchProfile() {
-      try {
-        const token = localStorage.getItem('accessToken');
-        if (!token) throw new Error('No token found');
-
-        const data: UserProfile = await getUserProfile(token);
-        setUser(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+    // If user is authenticated but profile not loaded, fetch it
+    if (user?.isAuthenticated && !user?.userProfile) {
+      getUserProfile();
     }
-
-    fetchProfile();
-  }, []);
+  }, [user?.isAuthenticated, user?.userProfile, getUserProfile]);
 
   const handleLogout = (): void => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('userId');
-    setUser(null);
-    window.location.href = '/';
+    logout(); // AuthContext handles all cleanup and navigation
   };
 
   if (loading) return <p className="p-4">Loading...</p>;
 
-  if (!user) return <p className="p-4">Could not load profile</p>;
+  if (!user?.isAuthenticated || !user?.userProfile) {
+    return <p className="p-4">Could not load profile</p>;
+  }
+
+  const userProfile = user.userProfile;
 
   const menuItems = [
     { icon: <Scroll size={20} />, label: 'Privacy Policy', href: `/privacy-policy` },
@@ -82,10 +62,10 @@ export default function ProfilePage() {
           <User className="w-full h-full object-cover" />
         </div>
         <h2 className="text-2xl font-bold mt-4 text-black dark:text-white">
-          Name: {user.name}
+          Name: {userProfile.name}
         </h2>
-        <p className="text-2xl text-black dark:text-white mt-1">Email: {user.email}</p>
-        <p className="text-2xl text-black dark:text-white mt-1">Role: {user.role}</p>
+        <p className="text-2xl text-black dark:text-white mt-1">Email: {userProfile.email}</p>
+        <p className="text-2xl text-black dark:text-white mt-1">Role: {userProfile.role}</p>
       </div>
 
       <div className="flex justify-around p-4 mt-8 bg-[#3F2E31] rounded-lg mx-6 shadow-lg">
@@ -97,13 +77,13 @@ export default function ProfilePage() {
         </div>
         <div className="flex flex-col items-center">
           <Tag size={24} className="text-white" />
-          <Link href={`/wishlist/${user._id}`} className="text-sm mt-2 text-white">
+          <Link href={`/wishlist/${userProfile._id}`} className="text-sm mt-2 text-white">
             My wishlist
           </Link>
         </div>
         <div className="flex flex-col items-center">
           <IdCard size={24} className="text-white" />
-          <Link href={`/orders/${user._id}`} className="text-sm mt-2 text-white">
+          <Link href={`/orders/${userProfile._id}`} className="text-sm mt-2 text-white">
             My Orders
           </Link>
         </div>

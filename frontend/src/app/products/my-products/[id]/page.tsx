@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import {updateProduct, fetchProductById, Product } from "../../../lib/product-api";
+import { fetchProductById, Product } from "../../../lib/product-api";
+import {updateProduct} from '@/app/lib/product-api-client'
 
 export default function EditProductPage() {
   const { id } = useParams();
