@@ -124,8 +124,8 @@ export default function SignupPage() {
         }}
       />
       
-      <main className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors">
-        <header className="flex items-center p-6 border-b border-gray-200 dark:border-gray-700">
+      <main className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors flex flex-col items-center">
+        <header className="w-full flex items-center p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
           <button 
             onClick={() => router.back()}
             className="mr-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -133,10 +133,10 @@ export default function SignupPage() {
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
-          <h1 className="text-xl font-semibold">Create Account</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold">Create Account</h1>
         </header>
 
-        <div className="px-6 py-8 max-w-md mx-auto">
+        <div className="w-full px-4 py-8 sm:px-6 max-w-md mx-auto flex-grow flex flex-col justify-center">
           {errors.length > 0 && (
             <div className="mb-6 bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-500/50 rounded-lg p-4" role="alert">
               {errors.map((error, index) => (
@@ -295,13 +295,14 @@ export default function SignupPage() {
             or sign up with
           </div>
 
-          <div className="flex space-x-4 mb-8">
+          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
             <button 
               type="button"
               className="flex-1 flex items-center justify-center py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
               aria-label="Sign up with Facebook (coming soon)"
             >
               <Facebook className="w-5 h-5 text-blue-500" />
+              <span className="ml-2 hidden sm:inline">Facebook</span>
             </button>
             <button 
               type="button"
@@ -314,6 +315,7 @@ export default function SignupPage() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
+              <span className="ml-2 hidden sm:inline">Google</span>
             </button>
           </div>
 
