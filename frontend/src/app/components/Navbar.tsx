@@ -22,7 +22,7 @@ export default function Navbar() {
       const token = localStorage.getItem('accessToken');
       if (token) {
         try {
-          const profile = await getUserProfile(token);
+          const profile = await getUserProfile();
           setUser(profile);
         } catch {
           setUser(null);
@@ -56,14 +56,14 @@ export default function Navbar() {
 
   return (
     <nav 
-      className="fixed top-0 z-50 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm"
+      className="fixed top-0 z-50 w-full bg-white dark:bg-gray-900 text-black dark:text-white border-b border-gray-200 dark:border-gray-700 shadow-sm"
       aria-label="Main Navigation"
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">Home decor</h1>
 
         <div className="flex items-center space-x-6">
-          <Link href="/"><Home className='hover:text-pink-500'/></Link>
+          <Link href="/" title='home'><Home className='hover:text-pink-500'/></Link>
 
           {/* Auth Links */}
           {!loading && !user ? (
@@ -89,14 +89,14 @@ export default function Navbar() {
                   <>
                     <Link
                       href="/products/my-products"
-                      className="text-gray-700 dark:text-gray-200 hover:text-orange-500"
+                      className="text-gray-700 dark:text-gray-200 hover:text-pink-400"
                     >
                       My products
                     </Link>
                   </>
                 )}
-                <Link href="/wishlist"><Scroll className='hover:text-pink-500'/></Link>
-                <Link href="/cart"><ShoppingBasket className='hover:text-pink-500'/></Link>
+                <Link href="/wishlist" title='wishlist'><Scroll className='hover:text-pink-500'/></Link>
+                <Link href="/cart" title='cart'><ShoppingBasket className='hover:text-pink-500'/></Link>
                 <Link
                   href="/profile"
                   className="text-gray-700 dark:text-gray-200 font-medium flex justify-center hover:text-pink-500"
