@@ -40,17 +40,16 @@ export default function ProfilePage() {
   const userProfile = user.userProfile;
 
   const menuItems = [
-    { icon: <Scroll size={20} />, label: 'Privacy Policy', href: `/privacy-policy` },
-    { icon: <IdCard size={20} />, label: 'Payment Methods', href: `/payment-methods` },
     { icon: <Bell size={20} />, label: 'Notification', href: `/notifications` },
-    { icon: <Settings size={20} />, label: 'Settings', href: `/settings` },
     { icon: <Bot size={20} />, label: 'Help', href: `/help` },
   ];
 
   return (
     <div className="bg-white dark:bg-gray-800 text-black dark:text-white min-h-screen mt-11">
       <div className="flex justify-between items-center p-4">
-        <ChevronLeft size={24} className="text-black dark:text-white" />
+        <Link href="/">
+          <ChevronLeft size={24} className="text-black dark:text-white" />
+        </Link>
         <h1 className="text-xl font-bold text-pink-600">My Profile</h1>
         <Link href={`/profile/update`}>
           <Pencil size={24} className="text-pink-600" />
@@ -77,13 +76,13 @@ export default function ProfilePage() {
         </div>
         <div className="flex flex-col items-center">
           <Tag size={24} className="text-white" />
-          <Link href={`/wishlist/${userProfile._id}`} className="text-sm mt-2 text-white">
+          <Link href="/wishlist" className="text-sm mt-2 text-white">
             My wishlist
           </Link>
         </div>
         <div className="flex flex-col items-center">
           <IdCard size={24} className="text-white" />
-          <Link href={`/orders/${userProfile._id}`} className="text-sm mt-2 text-white">
+          <Link href="/cart" className="text-sm mt-2 text-white">
             My Orders
           </Link>
         </div>
