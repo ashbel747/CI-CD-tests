@@ -1,127 +1,63 @@
-const API_BASE_URL = 'http://localhost:3000'; // Adjust to your NestJS port
+const API_BASE_URL = 'http://localhost:3000';
 
-// Token management (SSR-safe)
-export const getAccessToken = (): string | null => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('accessToken');
+const refreshToken = async (): Promise<boolean> => {
+  const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
+  if (!refreshToken) {
+    return false;
   }
-  return null;
-};
-
-export const getRefreshToken = (): string | null => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('refreshToken');
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (response.ok) {
+      const tokens = await response.json();
+      localStorage.setItem('accessToken', tokens.accessToken);
+      localStorage.setItem('refreshToken', tokens.refreshToken);
+      return true;
+    }
+  } catch (err) {
+    console.error('Token refresh failed', err);
   }
-  return null;
+  return false;
 };
 
-export const getUserId = (): string | null => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('userId');
-  }
-  return null;
-};
-
-export const removeTokens = (): void => {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('userId');
-  }
-};
-
-export const isLoggedIn = (): boolean => {
-  return !!getAccessToken();
-};
-
-// API call with automatic token refresh
-export const apiCall = async (endpoint: string, options: RequestInit = {}): Promise<Response> => {
-  const accessToken = getAccessToken();
-  
-  // Add authorization header if token exists
-  const headers = {
+// The core API call utility, now simplified for the caller
+export const apiCall = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
+  const accessToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
-    ...options.headers,
+    ...(options.headers as object),
   };
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  let response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,
   });
 
-  // If token expired, try to refresh
+  // If the token is unauthorized, try to refresh and re-run the request
   if (response.status === 401 && accessToken) {
-    const refreshToken = getRefreshToken();
-    if (refreshToken) {
-      try {
-        const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ refreshToken }),
-        });
-
-        if (refreshResponse.ok) {
-          const tokens = await refreshResponse.json();
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('accessToken', tokens.accessToken);
-            localStorage.setItem('refreshToken', tokens.refreshToken);
-          }
-
-          // Retry original request with new token
-          return fetch(`${API_BASE_URL}${endpoint}`, {
-            ...options,
-            headers: {
-              ...headers,
-              Authorization: `Bearer ${tokens.accessToken}`,
-            },
-          });
-        }
-      } catch (error) {
-        // Refresh failed, redirect to login
-        removeTokens();
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
-        }
-      }
+    const refreshed = await refreshToken();
+    if (refreshed) {
+      const newAccessToken = localStorage.getItem('accessToken');
+      headers.Authorization = `Bearer ${newAccessToken}`;
+      response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers,
+      });
+    } else {
+      // If refresh failed, we can't proceed. Return an error response.
+      return { ok: false, message: 'Authentication failed. Please log in again.' };
     }
   }
 
-  return response;
-};
+  const data = await response.json();
 
-// Logout function
-export const logout = (): void => {
-  removeTokens();
-  if (typeof window !== 'undefined') {
-    window.location.href = '/login';
+  if (!response.ok) {
+    throw new Error(data.message || `API call to ${endpoint} failed with status ${response.status}`);
   }
-};
 
-// Check if user is authenticated (for protected routes)
-export const requireAuth = (): boolean => {
-  if (typeof window !== 'undefined' && !isLoggedIn()) {
-    window.location.href = '/login';
-    return false;
-  }
-  return true;
-};
-
-// Hook for checking auth status in components
-export const useAuth = () => {
-  const checkAuth = () => {
-    return isLoggedIn();
-  };
-
-  const logoutUser = () => {
-    logout();
-  };
-
-  return {
-    isAuthenticated: checkAuth(),
-    userId: getUserId(),
-    logout: logoutUser,
-  };
+  return data;
 };

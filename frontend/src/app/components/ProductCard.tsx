@@ -8,12 +8,14 @@ import { HeartIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 
 const ProductCard = ({ product }: { product: Product }) => {
-  const { isWishlisted, toggleItem, loading } = useWishlist();
+  // Fixed: Use the correct function name from WishlistContext
+  const { isWishlisted, toggleWishlist, loading } = useWishlist();
 
   const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevents navigating to the product page
     e.stopPropagation(); // Stops event from bubbling up to the link
-    toggleItem(product._id);
+    // Fixed: Use toggleWishlist instead of toggleItem
+    toggleWishlist(product._id);
   };
 
   const discountedPrice: number | string = product.discountPercent

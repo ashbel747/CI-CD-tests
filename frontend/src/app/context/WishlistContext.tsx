@@ -1,85 +1,126 @@
-"use client";
+'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { fetchWishlist, toggleWishlist, WishlistItem } from '../lib/wishlist-api';
-import { isLoggedIn } from '../lib/auth';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import toast from 'react-hot-toast';
+import { useAuth } from './authContext';
+import { apiCall } from '../lib/auth';
 
-// Define the context type
+// Define the type for a product
+interface Product {
+  _id: string; // Use _id to match your old wishlist page
+  name: string;
+  price: number;
+  category: string;
+  niche: string;
+  image: string;
+  discountedPrice?: number;
+  initialPrice?: number;
+}
+
+// Define the shape of a wishlist item (just the product)
+export type WishlistItem = Product;
+
+// Define the shape of the context's value
 interface WishlistContextType {
   wishlist: WishlistItem[];
   loading: boolean;
-  toggleItem: (productId: string) => Promise<void>;
+  toggleWishlist: (productId: string) => Promise<void>;
   isWishlisted: (productId: string) => boolean;
-  refreshWishlist: () => void;
 }
 
-// Create the context
-const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
+const WishlistContext = createContext<WishlistContextType | undefined>(
+  undefined,
+);
 
-// Create the provider component
-export const WishlistProvider = ({ children }: { children: ReactNode }) => {
-  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  const loadWishlist = async () => {
-    if (!isLoggedIn()) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const items = await fetchWishlist();
-      setWishlist(items);
-    } catch (err) {
-      console.error("Failed to load wishlist:", err);
-      // We don't show a toast for this, as it's a passive fetch
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadWishlist();
-  }, []);
-
-  const toggleItem = async (productId: string) => {
-    try {
-      const updatedWishlist = await toggleWishlist(productId);
-      setWishlist(updatedWishlist);
-      
-      const isNowWishlisted = updatedWishlist.some(item => item._id === productId);
-      toast.success(isNowWishlisted ? "Added to wishlist!" : "Removed from wishlist!");
-
-    } catch (err: any) {
-      if (err.message === "AUTHENTICATION_REQUIRED") {
-        // The wishlist-api.ts handles the toast and redirect for this case.
-      } else {
-        toast.error("Failed to update wishlist.");
-        console.error("Wishlist toggle error:", err);
-      }
-    }
-  };
-
-  const isWishlisted = (productId: string): boolean => {
-    return wishlist.some(item => item._id === productId);
-  };
-  
-  const value = { wishlist, loading, toggleItem, isWishlisted, refreshWishlist: loadWishlist };
-
-  return (
-    <WishlistContext.Provider value={value}>
-      {children}
-    </WishlistContext.Provider>
-  );
-};
-
-// Create a custom hook for easy access
 export const useWishlist = () => {
   const context = useContext(WishlistContext);
   if (context === undefined) {
     throw new Error('useWishlist must be used within a WishlistProvider');
   }
   return context;
+};
+
+export const WishlistProvider = ({ children }: { children: ReactNode }) => {
+  const { user, loading: authLoading } = useAuth();
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Function to fetch the wishlist
+  const fetchWishlist = async () => {
+    if (!user) {
+      setWishlist([]); // Clear wishlist if user is logged out
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // apiCall returns the parsed JSON directly, not a Response object
+      const data = await apiCall('/wishlist');
+      setWishlist(data);
+    } catch (error) {
+      console.error('Failed to fetch wishlist:', error);
+      toast.error('Failed to load wishlist. Please try again.');
+      setWishlist([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Effect to fetch wishlist whenever the user or auth state changes
+  useEffect(() => {
+    if (!authLoading) {
+      fetchWishlist();
+    }
+  }, [user, authLoading]);
+
+  // Toggle a product in the wishlist (add or remove)
+  const toggleWishlist = async (productId: string) => {
+    if (!user) {
+      toast.error('Please log in to manage your wishlist.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // apiCall returns the parsed JSON directly, not a Response object
+      const updatedWishlist = await apiCall(`/wishlist/${productId}`, {
+        method: 'POST',
+      });
+      setWishlist(updatedWishlist);
+      toast.success(
+        isWishlisted(productId)
+          ? 'Item removed from wishlist.'
+          : 'Item added to wishlist!',
+      );
+    } catch (error) {
+      console.error('Failed to toggle wishlist item:', error);
+      toast.error('Failed to update wishlist. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isWishlisted = (productId: string) => {
+    return wishlist.some((item) => item._id === productId);
+  };
+
+  const value = {
+    wishlist,
+    loading,
+    toggleWishlist,
+    isWishlisted,
+  };
+
+  return (
+    <WishlistContext.Provider value={value}>
+      {children}
+    </WishlistContext.Provider>
+  );
 };
