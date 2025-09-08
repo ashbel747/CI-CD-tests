@@ -113,7 +113,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-10 px-4">
+    <div className="max-w-5xl mx-auto py-10 px-4 mt-11">
       <Toaster /> {/* Add the Toaster component */}
       <h1 className="text-3xl font-bold mb-8">My Cart</h1>
       <div className="space-y-6">
@@ -186,7 +186,7 @@ export default function CartPage() {
         })}
       </div>
 
-      <div className="mt-8 flex justify-between items-center">
+      <div className="mt-11 flex justify-between items-center">
         <h2 className="text-2xl font-bold">Total: Ksh {totalPrice.toLocaleString()}</h2>
         <button
           onClick={() => setIsModalOpen(true)}

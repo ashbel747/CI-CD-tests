@@ -76,8 +76,9 @@ export default function LoginPage() {
           })
         }}
       />
-      <main className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors flex flex-col items-center">
-        <header className="w-full flex items-center p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+      <main className="min-h-screen dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col items-center justify-center p-4">
+        {/* Mobile-only header (hidden on larger screens) */}
+        <header className="w-full flex items-center p-4 sm:p-6 lg:hidden">
           <button 
             onClick={() => router.back()}
             className="mr-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -88,7 +89,8 @@ export default function LoginPage() {
           <h1 className="text-xl sm:text-2xl font-semibold">Welcome Back</h1>
         </header>
 
-        <div className="w-full px-4 py-8 sm:px-6 max-w-md mx-auto flex-grow flex flex-col justify-center">
+        {/* Login Card Container */}
+        <div className="w-full max-w-xl md:max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 sm:p-8 md:p-10 lg:p-12">
           {errors.length > 0 && (
             <div className="mb-6 bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-500/50 rounded-lg p-4" role="alert">
               {errors.map((error, index) => (
@@ -102,7 +104,7 @@ export default function LoginPage() {
             <p className="text-gray-600 dark:text-gray-400">Enter your credentials to access your account</p>
           </div>
 
-          <div className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium label-text mb-2">
                 Email
@@ -160,12 +162,11 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              onClick={handleSubmit}
               className="w-full py-3 custom-button font-semibold rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900"
             >
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
-          </div>
+          </form>
 
           <div className="my-8 text-center text-sm text-gray-400">
             or sign in with

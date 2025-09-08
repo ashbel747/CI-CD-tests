@@ -18,7 +18,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className='bg-white dark:bg-gray-800 text-black dark:text-white'>
+      <body className='dark:bg-gray-900 dark:bg-gray-800 text-black dark:text-white'>
         {/* 🆕 Wrap the children with the AuthProvider */}
         <AuthProvider>
           <WishlistProvider>

@@ -115,9 +115,9 @@ export default function ChangePasswordPage() {
       });
 
       // Redirect to home or profile page after 2 seconds
-      setTimeout(() => {
-        router.push('/');
-      }, 2000);
+      // setTimeout(() => {
+      //   router.push('/');
+      // }, 2000);
       
     } catch (error) {
       setErrors([error instanceof Error ? error.message : 'An error occurred']);
