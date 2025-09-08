@@ -56,7 +56,7 @@ export default function ProductForm() {
       const res = await createProduct(formData);
       router.refresh();
       if (res._id) {
-        setMessage("✅ Product created successfully!");
+        setMessage("Product created successfully!");
         setForm({
           name: "",
           description: "",
@@ -79,9 +79,9 @@ export default function ProductForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-xl space-y-4"
+      className="max-w-screen mx-auto p-6 bg-white dark:bg-[#332a2c] shadow-md rounded-xl space-y-4 mt-20"
     >
-      <h2 className="text-2xl font-bold">Create New Product</h2>
+      <h2 className="text-2xl font-bold text-black dark:text-white">Create New Product</h2>
 
       <input
         type="text"
@@ -89,7 +89,7 @@ export default function ProductForm() {
         value={form.name}
         onChange={handleChange}
         placeholder="Product Name"
-        className="w-full p-2 border rounded-lg"
+        className="w-full bg-gray-400 dark:bg-[#3e3538] border border-transparent rounded-lg px-4 py-3 text-black dark:text-white placeholder-gray-500 focus:outline-none"
         required
       />
 
@@ -98,7 +98,7 @@ export default function ProductForm() {
         value={form.description}
         onChange={handleChange}
         placeholder="Product Description"
-        className="w-full p-2 border rounded-lg"
+        className="w-full bg-gray-400 dark:bg-[#3e3538] border border-transparent rounded-lg px-4 py-3 text-black dark:text-white placeholder-gray-500 focus:outline-none"
         required
       />
 
@@ -108,7 +108,7 @@ export default function ProductForm() {
         value={form.initialPrice}
         onChange={handleChange}
         placeholder="Initial Price"
-        className="w-full p-2 border rounded-lg"
+        className="w-full bg-gray-400 dark:bg-[#3e3538] border border-transparent rounded-lg px-4 py-3 text-black dark:text-white placeholder-gray-500 focus:outline-none"
         required
       />
 
@@ -118,7 +118,7 @@ export default function ProductForm() {
         value={form.discountPercent}
         onChange={handleChange}
         placeholder="Discount Percent (optional)"
-        className="w-full p-2 border rounded-lg"
+        className="w-full bg-gray-400 dark:bg-[#3e3538] border border-transparent rounded-lg px-4 py-3 text-black dark:text-white placeholder-gray-500 focus:outline-none"
       />
 
       <input
@@ -126,7 +126,7 @@ export default function ProductForm() {
         name="image"
         accept="image/*"
         onChange={handleChange}
-        className="w-full p-2 border rounded-lg"
+        className="w-full bg-gray-400 dark:bg-[#3e3538] border border-transparent rounded-lg px-4 py-3 text-black dark:text-white placeholder-gray-500 focus:outline-none"
         required
       />
 
@@ -135,7 +135,7 @@ export default function ProductForm() {
         name="category"
         value={form.category}
         onChange={handleChange}
-        className="w-full p-2 border rounded-lg"
+        className="w-full bg-gray-400 dark:bg-[#3e3538] border border-transparent rounded-lg px-4 py-3 text-black dark:text-white placeholder-gray-500 focus:outline-none"
         required
       >
         <option value="">Select Category</option>
@@ -151,7 +151,7 @@ export default function ProductForm() {
         name="niche"
         value={form.niche}
         onChange={handleChange}
-        className="w-full p-2 border rounded-lg"
+        className="w-full bg-gray-400 dark:bg-[#3e3538] border border-transparent rounded-lg px-4 py-3 text-black dark:text-white placeholder-gray-500 focus:outline-none"
         required
       >
         <option value="">Select Niche</option>
@@ -165,7 +165,7 @@ export default function ProductForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition"
+        className="w-full bg-gray-700 dark:bg-pink-400 hover:opacity-50 border border-transparent rounded-lg px-4 py-3 text-black dark:text-white placeholder-gray-500 focus:outline-none"
       >
         {loading ? "Creating..." : "Create Product"}
       </button>

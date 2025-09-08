@@ -59,18 +59,18 @@ export default function MyProductsPage() {
       </div>
     );
   if (products.length === 0)
-    return <p className="p-6">No products created yet.</p>;
+    return <p className="p-6 text-black dark:text-white">No products created yet.</p>;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-12 text-center">
+    <div className="min-h-screen bg-white dark:bg-gray-800 p-8 mt-11">
+      <h1 className="text-3xl font-bold text-black dark:text-white mb-12 text-center">
         My Products
       </h1>
 
       <div className="m-3">
         <Link
           href={`/products/create`}
-          className="bg-red-500 text-white text-xs font-bold p-5 rounded-full shadow-md"
+          className="bg-gray-400 dark:bg-pink-400 text-black dark:text-white font-bold p-3 rounded shadow-md"
         >
           Create new product
         </Link>
@@ -97,7 +97,7 @@ function ProductCard({
   onDelete: () => void;
 }) {
   return (
-    <div className="bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition">
+    <div className="bg-gray-400 dark:bg-gray-700 text-black dark:text-white shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition">
       <div className="relative">
         {product.image && (
           <Image
@@ -110,19 +110,19 @@ function ProductCard({
         )}
 
         {product.discountPercent && (
-          <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+          <span className="absolute top-2 right-2 bg-red-500 text-xs font-bold px-3 py-1 rounded-full shadow-md">
             - {product.discountPercent}%
           </span>
         )}
       </div>
 
       <div className="p-4">
-        <h2 className="text-lg font-semibold text-gray-800">{product.name}</h2>
+        <h2 className="text-lg font-semibold">{product.name}</h2>
 
         <div className="flex items-center gap-2 mb-3">
           {product.discountedPrice ? (
             <>
-              <span className="text-gray-400 line-through">
+              <span className="line-through">
                 Ksh {product.initialPrice}
               </span>
               <span className="text-green-600 font-bold">

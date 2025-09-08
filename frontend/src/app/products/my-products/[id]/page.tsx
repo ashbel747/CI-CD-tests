@@ -68,37 +68,45 @@ export default function EditProductPage() {
   if (!product) return <p className="p-6">Product not found.</p>;
 
   return (
-    <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6 mt-10">
-      <h1 className="text-2xl font-bold mb-6">Edit Product</h1>
+      <form onSubmit={handleSubmit} className="max-w-screen mx-auto p-6 bg-white dark:bg-[#332a2c] shadow-md rounded-xl space-y-4 mt-11">
+        <h1 className="text-2xl font-bold text-black dark:text-white">Edit Product</h1>
 
-      {message && (
-        <div
-          className={`mb-4 p-2 rounded ${
-            message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-          }`}
-        >
-          {message.text}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input name="name" defaultValue={product.name} className="w-full border p-2 rounded" required />
-        <textarea name="description" defaultValue={product.description} className="w-full border p-2 rounded" required />
+        <input
+          name="name" 
+          defaultValue={product.name}
+          className="w-full bg-gray-400 dark:bg-[#3e3538] border border-transparent rounded-lg px-4 py-3 text-black dark:text-white placeholder-gray-500 focus:outline-none" 
+          required 
+        />
+        <textarea
+          name="description" 
+          defaultValue={product.description} className="w-full bg-gray-400 dark:bg-[#3e3538] border border-transparent rounded-lg px-4 py-3 text-black dark:text-white placeholder-gray-500 focus:outline-none" 
+          required 
+        />
         <input
           name="initialPrice"
           defaultValue={product.initialPrice}
           type="number"
-          className="w-full border p-2 rounded"
+          className="w-full bg-gray-400 dark:bg-[#3e3538] border border-transparent rounded-lg px-4 py-3 text-black dark:text-white placeholder-gray-500 focus:outline-none"
           required
         />
         <input
           name="discountPercent"
           defaultValue={product.discountPercent}
           type="number"
-          className="w-full border p-2 rounded"
+          className="w-full bg-gray-400 dark:bg-[#3e3538] border border-transparent rounded-lg px-4 py-3 text-black dark:text-white placeholder-gray-500 focus:outline-none"
         />
-        <input name="category" defaultValue={product.category} className="w-full border p-2 rounded" required />
-        <input name="niche" defaultValue={product.niche} className="w-full border p-2 rounded" required />
+        <input
+          name="category" 
+          defaultValue={product.category} 
+          className="w-full bg-gray-400 dark:bg-[#3e3538] border border-transparent rounded-lg px-4 py-3 text-black dark:text-white placeholder-gray-500 focus:outline-none" 
+          required 
+        />
+        <input 
+          name="niche" 
+          defaultValue={product.niche} 
+          className="w-full bg-gray-400 dark:bg-[#3e3538] border border-transparent rounded-lg px-4 py-3 text-black dark:text-white placeholder-gray-500 focus:outline-none" 
+          required 
+        />
 
         <div>
           <label className="block mb-1 font-medium">Upload New Image (optional)</label>
@@ -114,11 +122,20 @@ export default function EditProductPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="w-full bg-gray-700 dark:bg-pink-400 hover:opacity-50 border border-transparent rounded-lg px-4 py-3 text-black dark:text-white placeholder-gray-500 focus:outline-none"
         >
           {submitting ? "Saving..." : "Save"}
         </button>
+
+        {message && (
+        <div
+          className={`mb-4 p-2 rounded ${
+            message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
       </form>
-    </div>
   );
 }

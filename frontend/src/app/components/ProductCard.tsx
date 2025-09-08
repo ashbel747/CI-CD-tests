@@ -26,7 +26,7 @@ const ProductCard = ({ product }: { product: Product }) => {
     : product.initialPrice;
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition cursor-pointer relative">
+    <div className="bg-gray-400 dark:bg-gray-700 shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition cursor-pointer relative">
       <Link href={`/products/${product._id}`}>
         <div className="relative">
           <Image

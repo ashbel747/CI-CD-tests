@@ -2,6 +2,18 @@
 
 import { apiCall } from "./auth";
 
+export interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  initialPrice: number;
+  discountPercent: number;
+  imageUrl: string;
+  category: string;
+  niche: string;
+}
+
+
 // ---------- Authenticated Product APIs (Client-side only) ----------
 
 export const fetchMyProducts = async () => {
@@ -10,22 +22,18 @@ export const fetchMyProducts = async () => {
   return data;
 };
 
-export const createProduct = async (formData: FormData) => {
-  // apiCall returns the parsed JSON directly, not a Response object
-  const data = await apiCall("/products", {
+export const createProduct = async (formData: FormData): Promise<Product> => {
+  const data = await apiCall<Product>("/products", {
     method: "POST",
-    // The browser will automatically set the Content-Type header to multipart/form-data for FormData.
     body: formData,
   });
 
   return data;
 };
 
-export const updateProduct = async (id: string, formData: FormData) => {
-  // apiCall returns the parsed JSON directly, not a Response object
-  const data = await apiCall(`/products/${id}`, {
+export const updateProduct = async (id: string, formData: FormData): Promise<Product> => {
+  const data = await apiCall<Product>(`/products/${id}`, {
     method: "PUT",
-    // The browser will automatically set the Content-Type header to multipart/form-data for FormData.
     body: formData,
   });
 
