@@ -3,6 +3,7 @@ import '@/app/globals.css';
 import { Toaster } from 'react-hot-toast'; // import Toaster
 import Navbar from './components/Navbar';
 import { WishlistProvider } from './context/WishlistContext'; // 🆕 Import the WishlistProvider
+import ChatbotButton from './components/ChatbotButton';
 
 export const metadata: Metadata = {
   title: 'Your App Name',
@@ -20,6 +21,7 @@ export default function RootLayout({
         {/* 🆕 Wrap the children with the WishlistProvider */}
         <WishlistProvider>
           <Navbar />
+          <ChatbotButton />
           {children}
         </WishlistProvider>
 
