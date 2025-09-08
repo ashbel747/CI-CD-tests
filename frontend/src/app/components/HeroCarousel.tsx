@@ -53,6 +53,7 @@ const HeroCarousel: React.FC = () => {
 
   return (
     <section
+      data-testid="hero-carousel"
       className="relative w-full h-[50vh] md:h-[70vh] overflow-hidden shadow-lg mt-11"
       aria-label="Promotional Furniture Carousel"
     >
