@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, Eye, EyeOff, Facebook } from 'lucide-react';
-
-const API_BASE_URL = 'http://localhost:3000'; 
+import { useAuth } from '../../context/authContext'; // Update import path if necessary
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -13,19 +12,15 @@ export default function LoginPage() {
     password: ''
   });
   const [errors, setErrors] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  
   const router = useRouter();
+  const { login, loading } = useAuth();
 
-  // Handle client-side mounting and SEO
   useEffect(() => {
     setIsMounted(true);
-    
-    // SEO Meta Tags - only on client side
     document.title = 'Sign In | Welcome Back to Our Marketplace';
-    
-    // Create meta tags
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute('content', 'Sign in to your account to access your marketplace dashboard. Secure login for buyers and sellers.');
@@ -35,93 +30,35 @@ export default function LoginPage() {
       meta.content = 'Sign in to your account to access your marketplace dashboard. Secure login for buyers and sellers.';
       document.head.appendChild(meta);
     }
-
-    // Keywords meta tag
-    const metaKeywords = document.querySelector('meta[name="keywords"]');
-    if (metaKeywords) {
-      metaKeywords.setAttribute('content', 'login, sign in, marketplace, account access, secure login, buyer login, seller login');
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'keywords';
-      meta.content = 'login, sign in, marketplace, account access, secure login, buyer login, seller login';
-      document.head.appendChild(meta);
-    }
-
-    // Open Graph tags
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (!ogTitle) {
-      const meta = document.createElement('meta');
-      meta.setAttribute('property', 'og:title');
-      meta.content = 'Sign In | Welcome Back to Our Marketplace';
-      document.head.appendChild(meta);
-    }
-
-    const ogDescription = document.querySelector('meta[property="og:description"]');
-    if (!ogDescription) {
-      const meta = document.createElement('meta');
-      meta.setAttribute('property', 'og:description');
-      meta.content = 'Sign in to your account to access your marketplace dashboard.';
-      document.head.appendChild(meta);
-    }
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    // Clear errors when user starts typing
     if (errors.length > 0) {
       setErrors([]);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setErrors([]);
-
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
-      // Store tokens in localStorage (SSR-safe)
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('refreshToken', data.refreshToken);
-        localStorage.setItem('userId', data.userId);
-      }
-
-      // Redirect to root
-      router.push('/');
-      
+      await login(formData.email, formData.password);
     } catch (error) {
       setErrors([error instanceof Error ? error.message : 'An error occurred']);
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  // Don't render until mounted to avoid hydration issues
   if (!isMounted) {
     return null;
   }
 
   return (
     <>
-      {/* Schema.org structured data for SEO - only render on client */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -139,9 +76,7 @@ export default function LoginPage() {
           })
         }}
       />
-
       <main className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors">
-        {/* Header */}
         <header className="flex items-center p-6 border-b border-gray-200 dark:border-gray-700">
           <button 
             onClick={() => router.back()}
@@ -154,7 +89,6 @@ export default function LoginPage() {
         </header>
 
         <div className="px-6 py-8 max-w-md mx-auto">
-          {/* Error Messages */}
           {errors.length > 0 && (
             <div className="mb-6 bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-500/50 rounded-lg p-4" role="alert">
               {errors.map((error, index) => (
@@ -163,15 +97,12 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Welcome Message */}
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold header-text mb-2">Sign In</h2>
             <p className="text-gray-600 dark:text-gray-400">Enter your credentials to access your account</p>
           </div>
 
-          {/* Login Form */}
           <div className="space-y-6">
-            {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium label-text mb-2">
                 Email
@@ -191,7 +122,6 @@ export default function LoginPage() {
               <div id="email-help" className="sr-only">Enter the email address associated with your account</div>
             </div>
 
-            {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium label-text mb-2">
                 Password
@@ -221,30 +151,26 @@ export default function LoginPage() {
               <div id="password-help" className="sr-only">Enter your account password</div>
             </div>
 
-            {/* Change Password Link */}
             <div className="text-right">
               <Link href="/change-password" className="text-sm text-gray-700 dark:text-gray-300 hover:text-orange-500 underline transition-colors">
                 Change Password
               </Link>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={loading}
               onClick={handleSubmit}
               className="w-full py-3 custom-button font-semibold rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900"
             >
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </div>
 
-          {/* Divider */}
           <div className="my-8 text-center text-sm text-gray-400">
             or sign in with
           </div>
 
-          {/* Social Login Buttons */}
           <div className="flex space-x-4 mb-8">
             <button 
               type="button"
@@ -267,7 +193,6 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Signup Link */}
           <div className="text-center text-sm terms-text">
             Dont have an account?{' '}
             <Link href="/signup" className="text-orange-500 hover:text-orange-400 font-medium underline">

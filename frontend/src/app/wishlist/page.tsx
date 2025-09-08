@@ -1,19 +1,20 @@
-"use client";
+'use client';
 
 import { useWishlist } from "@/app/context/WishlistContext";
+import { useAuth } from "@/app/context/authContext";
 import { addToCart } from "@/app/lib/cart-api";
-import { isLoggedIn } from "@/app/lib/auth";
 import Image from "next/image";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 export default function WishlistPage() {
-  const { wishlist, loading, toggleItem, refreshWishlist } = useWishlist();
+  const { wishlist, loading, toggleWishlist } = useWishlist();
+  const { user } = useAuth();
   const router = useRouter();
 
   const handleAddToCart = async (productId: string) => {
-    if (!isLoggedIn()) {
+    if (!user) {
       toast.error("Please log in to add items to cart.");
       router.push("/login");
       return;
@@ -22,8 +23,6 @@ export default function WishlistPage() {
     try {
       await addToCart(productId, 1);
       toast.success("Product added to cart!");
-      // Optionally, you can also remove it from the wishlist after adding to cart
-      // await toggleItem(productId);
     } catch (err) {
       console.error("Add to cart error:", err);
       toast.error("Failed to add to cart.");
@@ -31,7 +30,7 @@ export default function WishlistPage() {
   };
 
   const handleRemove = async (productId: string) => {
-    await toggleItem(productId);
+    await toggleWishlist(productId);
   };
 
   if (loading) {

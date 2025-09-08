@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Eye, EyeOff, Shield, CheckCircle } from 'lucide-react';
-import { apiCall, requireAuth } from '@/app/lib/auth'; // Adjust path to your auth utilities
+import { apiCall } from '../../lib/auth'; // Correct import path for your new API utility
+import { useAuth } from '../../context/authContext'; // Import the useAuth hook
 
 export default function ChangePasswordPage() {
   const [formData, setFormData] = useState({
@@ -19,17 +20,22 @@ export default function ChangePasswordPage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  
   const router = useRouter();
+  const { user, loading } = useAuth(); // Access the user and loading state from the context
 
   // Check authentication and handle client-side mounting
   useEffect(() => {
     setIsMounted(true);
-    requireAuth();
+    
+    // Redirect if not authenticated after the loading state is ready
+    if (!loading && !user?.isAuthenticated) {
+      router.push('/login');
+    }
     
     // SEO Meta Tags - only on client side
     document.title = 'Change Password | Secure Your Account';
     
-    // Create meta tags
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute('content', 'Update your account password securely. Change your current password to a new one with enhanced security.');
@@ -39,7 +45,7 @@ export default function ChangePasswordPage() {
       meta.content = 'Update your account password securely. Change your current password to a new one with enhanced security.';
       document.head.appendChild(meta);
     }
-  }, []);
+  }, [loading, user, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -89,19 +95,14 @@ export default function ChangePasswordPage() {
     }
 
     try {
-      const response = await apiCall('/auth/change-password', {
+      // Use the updated apiCall which throws on failure
+      await apiCall('/auth/change-password', {
         method: 'PUT',
         body: JSON.stringify({
           oldPassword: formData.oldPassword,
           newPassword: formData.newPassword,
         }),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to change password');
-      }
 
       // Show success message
       setSuccessMessage('Password changed successfully! Redirecting...');
@@ -125,8 +126,8 @@ export default function ChangePasswordPage() {
     }
   };
 
-  // Don't render until mounted to avoid hydration issues
-  if (!isMounted) {
+  // Don't render until mounted and auth state is ready
+  if (!isMounted || loading) {
     return null;
   }
 

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -8,8 +8,8 @@ import ReviewList from "../../components/ReviewList";
 import ReviewForm from "../../components/ReviewForm";
 import toast from "react-hot-toast";
 import { addToCart } from "../../lib/cart-api";
-import { isLoggedIn } from "../../lib/auth";
 import { useWishlist } from "@/app/context/WishlistContext";
+import { useAuth } from "@/app/context/authContext"; // 🆕 Import the auth context
 import { HeartIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 
@@ -21,7 +21,8 @@ export default function ProductDetailPage() {
   const [error, setError] = useState("");
   const [addingToCart, setAddingToCart] = useState(false);
 
-  const { isWishlisted, toggleItem, loading: wishlistLoading } = useWishlist();
+  const { isWishlisted, toggleWishlist, loading: wishlistLoading } = useWishlist(); // 🆕 Use toggleWishlist
+  const { user } = useAuth(); // 🆕 Get the user state from the auth context
 
   async function loadProduct() {
     try {
@@ -42,7 +43,8 @@ export default function ProductDetailPage() {
   const handleAddToCart = async () => {
     if (!product) return;
 
-    if (!isLoggedIn()) {
+    // 🆕 Use the new 'user' object from the auth context
+    if (!user) {
       toast.error("Please log in to add items to cart");
       router.push("/login");
       return;
@@ -55,16 +57,7 @@ export default function ProductDetailPage() {
       router.push("/cart");
     } catch (err: any) {
       console.error("Add to cart error:", err);
-
-      if (err.message === "AUTHENTICATION_REQUIRED") {
-        toast.error("Please log in to add items to cart");
-        router.push("/login");
-      } else if (err.message.includes("401") || err.message.includes("Unauthorized")) {
-        toast.error("Your session has expired. Please log in again.");
-        router.push("/login");
-      } else {
-        toast.error("Failed to add product to cart. Please try again.");
-      }
+      toast.error("Failed to add product to cart. Please try again.");
     } finally {
       setAddingToCart(false);
     }
@@ -72,7 +65,8 @@ export default function ProductDetailPage() {
 
   const handleToggleWishlist = () => {
     if (!product) return;
-    toggleItem(product._id);
+    // 🆕 Use the correct function name from the context
+    toggleWishlist(product._id);
   };
 
   if (loading) return <p className="text-center mt-20">Loading product...</p>;
@@ -91,7 +85,8 @@ export default function ProductDetailPage() {
     ? product.initialPrice * (1 - product.discountPercent / 100)
     : null;
 
-  const userLoggedIn = isLoggedIn();
+  // 🆕 Use the user object from the auth context
+  const userLoggedIn = !!user;
 
   return (
     <div className="min-h-screen bg-background py-8">

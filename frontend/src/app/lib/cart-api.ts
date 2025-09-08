@@ -1,7 +1,11 @@
-import {isLoggedIn,apiCall} from './auth'
+'use client';
 
+import { apiCall } from "../lib/auth";
+import toast from 'react-hot-toast';
+
+// Define a type for a cart item
 export type CartItem = {
-  productId: {        // Product object (populated)
+  productId: { // Product object (populated)
     _id: string;
     name: string;
     initialPrice: number;
@@ -13,92 +17,84 @@ export type CartItem = {
   quantity: number;
 };
 
-// Helper function to check authentication before cart operations
-const requireAuth = (): void => {
-  if (!isLoggedIn()) {
-    throw new Error("AUTHENTICATION_REQUIRED");
-  }
-};
-
 // -------------------- Cart API Functions --------------------
-
-// Fetch all items in the cart
-export const fetchCart = async (): Promise<CartItem[]> => {
-  requireAuth();
-  
-  const response = await apiCall('/cart');
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to fetch cart: ${response.status} ${error}`);
-  }
-
-  return response.json();
-};
 
 // Add a product to the cart
 export const addToCart = async (productId: string, quantity: number = 1): Promise<CartItem[]> => {
-  requireAuth();
+  try {
+    // apiCall returns the parsed JSON directly, not a Response object
+    const data = await apiCall('/cart', {
+      method: "POST",
+      body: JSON.stringify({ productId, quantity }),
+    });
 
-  const response = await apiCall('/cart', {
-    method: "POST",
-    body: JSON.stringify({ productId, quantity }),
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to add to cart: ${response.status} ${error}`);
+    return data;
+  } catch (err: any) {
+    console.error("Add to cart error:", err);
+    toast.error("Failed to add product to cart. Please try again.");
+    throw err;
   }
-
-  return response.json();
 };
 
-// Remove an item from the cart (set quantity to 0)
-export const removeFromCart = async (productId: string): Promise<CartItem[]> => {
-  requireAuth();
-
-  const response = await apiCall('/cart', {
-    method: "PUT",
-    body: JSON.stringify({ productId, quantity: 0 }),
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to remove item: ${response.status} ${error}`);
+// Fetch all items in the cart
+export const fetchCart = async (): Promise<CartItem[]> => {
+  try {
+    // apiCall returns the parsed JSON directly, not a Response object
+    const data = await apiCall('/cart');
+    return data;
+  } catch (err: any) {
+    console.error("Failed to fetch cart:", err);
+    toast.error("Failed to fetch cart. Please try again.");
+    return []; // Return an empty array on failure
   }
-
-  return response.json();
 };
 
 // Update the quantity of a cart item
 export const updateCartItem = async (productId: string, quantity: number): Promise<CartItem[]> => {
-  requireAuth();
+  try {
+    // apiCall returns the parsed JSON directly, not a Response object
+    const data = await apiCall('/cart', {
+      method: "PUT",
+      body: JSON.stringify({ productId, quantity }),
+    });
 
-  const response = await apiCall('/cart', {
-    method: "PUT",
-    body: JSON.stringify({ productId, quantity }),
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to update cart item: ${response.status} ${error}`);
+    return data;
+  } catch (err: any) {
+    console.error("Failed to update cart item:", err);
+    toast.error("Failed to update cart item. Please try again.");
+    throw err;
   }
+};
 
-  return response.json();
+// Remove an item from the cart (set quantity to 0)
+export const removeFromCart = async (productId: string): Promise<CartItem[]> => {
+  try {
+    // apiCall returns the parsed JSON directly, not a Response object
+    const data = await apiCall('/cart', {
+      method: "PUT",
+      body: JSON.stringify({ productId, quantity: 0 }),
+    });
+
+    return data;
+  } catch (err: any) {
+    console.error("Failed to remove item:", err);
+    toast.error("Failed to remove item from cart. Please try again.");
+    throw err;
+  }
 };
 
 // Checkout cart (clears cart)
 export const checkoutCart = async (): Promise<{ message: string }> => {
-  requireAuth();
+  try {
+    // apiCall returns the parsed JSON directly, not a Response object
+    const data = await apiCall('/cart/checkout', {
+      method: "POST",
+    });
 
-  const response = await apiCall('/cart/checkout', {
-    method: "POST",
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to checkout: ${response.status} ${error}`);
+    return data;
+  } catch (err: any) {
+    console.error("Failed to checkout:", err);
+    toast.error("Failed to checkout. Please try again.");
+    throw err;
   }
-
-  return response.json();
 };

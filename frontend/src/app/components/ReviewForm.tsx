@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { addReview } from "../lib/product-api";
+import { addReview } from "../lib/product-api-client";
 
 type ReviewFormProps = {
   productId: string;
