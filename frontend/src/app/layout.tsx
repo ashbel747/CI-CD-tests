@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast'; // import Toaster
 import Navbar from './components/Navbar';
 import { WishlistProvider } from './context/WishlistContext';
 import { AuthProvider } from './context/authContext'; // 🆕 Import the AuthProvider
+import ChatbotButton from './components/ChatbotButton';
 
 export const metadata: Metadata = {
   title: 'Your App Name',
@@ -22,6 +23,7 @@ export default function RootLayout({
         <AuthProvider>
           <WishlistProvider>
             <Navbar />
+            <ChatbotButton />
             {children}
           </WishlistProvider>
         </AuthProvider>
