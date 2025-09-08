@@ -31,7 +31,7 @@ const HelpAndFaqs: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+    <div data-testid="faqs-container" className="container mx-auto p-4 sm:p-6 lg:p-8">
       <div className="flex justify-center mb-6 border-b-2 border-gray-900 dark:border-pink-600">
         <button
           className={`py-2 mr-2 px-4 font-semibold rounded-lg text-lg ${
