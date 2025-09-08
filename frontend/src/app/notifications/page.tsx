@@ -108,6 +108,7 @@ const NotificationCard: FC<NotificationCardProps> = ({
 }) => {
   return (
     <div
+      data-testid="notification-card"
       className={`bg-white dark:bg-gray-600 rounded-xl shadow-md p-4 flex justify-between items-center hover:shadow-lg transition ${
         notification.read ? "opacity-70" : ""
       }`}
