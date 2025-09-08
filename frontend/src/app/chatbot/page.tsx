@@ -1,5 +1,20 @@
 import React from 'react';
 import { Mic, Send,  Headphones, Camera} from 'lucide-react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "AI Chatbot Assistant | Home Decor",
+  description:
+    "Chat with our AI-powered assistant to get instant answers, product recommendations, and support for your home decor shopping experience.",
+  keywords: [
+    "chatbot",
+    "AI assistant",
+    "customer support",
+    "home decor help",
+    "shopping assistant",
+    "virtual assistant",
+  ],
+};
 
 const Chatbot = () => {
   return (
