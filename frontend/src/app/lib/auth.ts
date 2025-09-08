@@ -23,12 +23,15 @@ const refreshToken = async (): Promise<boolean> => {
   return false;
 };
 
-// The core API call utility, now simplified for the caller
-export const apiCall = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
+// ✅ Core API call with proper return typing
+export const apiCall = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
   const accessToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+
+  // 🛠️ IMPORTANT: Only set Content-Type to application/json if the body is not FormData
+  const isFormData = options.body instanceof FormData;
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
     ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+    ...(!isFormData && { 'Content-Type': 'application/json' }), // Conditionally set header
     ...(options.headers as object),
   };
 
@@ -37,7 +40,6 @@ export const apiCall = async (endpoint: string, options: RequestInit = {}): Prom
     headers,
   });
 
-  // If the token is unauthorized, try to refresh and re-run the request
   if (response.status === 401 && accessToken) {
     const refreshed = await refreshToken();
     if (refreshed) {
@@ -48,8 +50,7 @@ export const apiCall = async (endpoint: string, options: RequestInit = {}): Prom
         headers,
       });
     } else {
-      // If refresh failed, we can't proceed. Return an error response.
-      return { ok: false, message: 'Authentication failed. Please log in again.' };
+      throw new Error('Authentication failed. Please log in again.');
     }
   }
 
@@ -59,5 +60,5 @@ export const apiCall = async (endpoint: string, options: RequestInit = {}): Prom
     throw new Error(data.message || `API call to ${endpoint} failed with status ${response.status}`);
   }
 
-  return data;
+  return data as T; // ✅ Only return payload, not { data: ... }
 };
