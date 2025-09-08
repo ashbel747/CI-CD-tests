@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createProduct } from "../lib/product-api-client";
 import { useRouter } from "next/navigation";
 
-const categories = ["Top Picks", "Best Seller", "Special Offer",];
+const categories = ["Top Picks", "Special Offer",];
 const niches = ["living room", "kitchen", "bed room", "dining room", "office"];
 
 export default function ProductForm() {
