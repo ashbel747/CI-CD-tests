@@ -87,8 +87,9 @@ export default function UpdateProfileForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-4 text-sm">
             <div>
-              <label className="block text-gray-400 mb-1">Full Name</label>
+              <label htmlFor="name" className="block text-gray-400 mb-1">Full Name</label>
               <input
+                id="name"
                 type="text"
                 value={formData.name || ""}
                 onChange={(e) =>
@@ -101,8 +102,9 @@ export default function UpdateProfileForm() {
             </div>
             
             <div>
-              <label className="block text-gray-400 mb-1">Email</label>
+              <label htmlFor="email" className="block text-gray-400 mb-1">Email</label>
               <input
+                id="email"
                 type="email"
                 value={formData.email || ""}
                 onChange={(e) =>

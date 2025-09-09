@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Login Page', () => {
-  test('user can log in ', async ({ page }) => {
+  test('user can log in', async ({ page }) => {
     // Go to login page
     await page.goto('/login');
 
@@ -12,7 +12,5 @@ test.describe('Login Page', () => {
 
     // Wait for redirect after login
     await expect(page).toHaveURL('/');
-
-    
   });
 });
