@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
     unoptimized: true,
     domains: ["res.cloudinary.com"],
   },
+  outputFileTracingRoot: __dirname,
 };
 
 export default nextConfig;
