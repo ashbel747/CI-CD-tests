@@ -17,8 +17,6 @@ export type CartItem = {
   quantity: number;
 };
 
-// -------------------- Cart API Functions --------------------
-
 // Add a product to the cart
 export const addToCart = async (productId: string, quantity: number = 1): Promise<CartItem[]> => {
   try {

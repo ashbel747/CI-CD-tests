@@ -55,8 +55,7 @@ const ProductCard = ({ product }: { product: Product }) => {
           </button>
         </div>
 
-        <div className="p-4">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+<div className="p-4" data-testid={`product-${product._id}`}>          <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
             {product.name}
           </h2>
 
