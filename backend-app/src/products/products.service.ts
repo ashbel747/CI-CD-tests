@@ -11,6 +11,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { CloudinaryService } from '../config/cloudinary';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { User, UserDocument } from '../auth/schemas/user.schema';
+import axios from 'axios';
 
 @Injectable()
 export class ProductsService {
@@ -44,7 +45,21 @@ export class ProductsService {
       createdBy: userId,
     });
 
-    return created.save();
+    const savedProduct = await created.save();
+
+    try {
+      await axios.post(
+        'https://directedjeremiah.app.n8n.cloud/webhook/550cd07c-bd08-4733-98fa-ab0ba66fcda8',
+        {
+          name: savedProduct.name,
+          description: savedProduct.description,
+        },
+      );
+      } catch (error) {
+        console.error('Failed to send webhook:', error.message);
+      }
+
+      return savedProduct;
   }
 
   async findAll(filters: { search?: string; category?: string; niche?: string }) {
