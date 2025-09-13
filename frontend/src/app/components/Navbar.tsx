@@ -102,12 +102,20 @@ export default function Navbar() {
             user && (
               <div className="flex items-center space-x-3 lg:space-x-4">
                 {user.role === "seller" && (
-                  <Link
-                    href="/products/my-products"
-                    className="hidden md:block text-gray-700 dark:text-gray-200 hover:text-pink-500 font-medium transition-colors"
-                  >
-                    My Products
-                  </Link>
+                  <>
+                    <Link
+                      href="/products/create"
+                      className="hidden md:block text-gray-700 dark:text-gray-200 hover:text-pink-500 font-medium transition-colors"
+                    >
+                      Create new product
+                    </Link>
+                    <Link
+                      href="/products/my-products"
+                      className="hidden md:block text-gray-700 dark:text-gray-200 hover:text-pink-500 font-medium transition-colors"
+                    >
+                      My Products
+                    </Link>
+                  </>
                 )}
                 
                 <Link 
