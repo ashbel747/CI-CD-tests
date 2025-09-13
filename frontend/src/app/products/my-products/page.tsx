@@ -50,7 +50,7 @@ export default function MyProductsPage() {
   }
 
   // ---- UI states ----
-  if (loading) return <p className="p-6">Loading...</p>;
+  if (loading) return <p className="p-6 mt-11">Loading...</p>;
   if (error)
     return (
       <div className="p-6 text-center text-red-600">
